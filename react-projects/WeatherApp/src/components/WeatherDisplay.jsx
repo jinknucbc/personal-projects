@@ -1,9 +1,16 @@
 import React from 'react'
 import WeatherCard from './WeatherCard'
+import ForecastCard from './ForecastCard'
 
-function DisplayWeather({weatherObj}) {
-    if (!weatherObj) {
-        return <div>Nothing to show here...</div>
+function DisplayWeather({forecastWeather, weatherError}) {
+    if (!forecastWeather) {
+        return <div>{weatherError}</div>
+    }
+
+    if (forecastWeather) {
+      console.log("This is current data: ", forecastWeather.current)
+
+      console.log("This is forecast data: ", forecastWeather)
     }
 
    
@@ -23,8 +30,17 @@ function DisplayWeather({weatherObj}) {
     // Well, it looks like passing the entire object would be better
     // <WeatherCard cardData={weatherObj} />
   return (
+    <>
+      <WeatherCard cardData={forecastWeather} />
+      {/* 
+      Even though the forecast days are contained as objects in an array, 
+      because we'll be looping through the array, ForecastCard need only a single
+      object passed into it as a prop.
+      */}
+      <ForecastCard cardData={forecastWeather.forecast.forecastday[0]} />
+    </>
     // <div>Current temperature in Fahrenheit in {weatherObj.location.name} is {weatherObj.current.temp_f}</div>
-    <WeatherCard cardData={weatherObj} />
+    
   )
 }
 

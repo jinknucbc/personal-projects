@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from './Header'
 import '../styles/App.css'
 import FetchLocation from './FetchLocation'
@@ -18,8 +18,10 @@ import DisplayWeather from './WeatherDisplay'
 
 function App() {
   const {locationData, error: locationError} = FetchLocation();
-  const [weatherData, setWeatherData] = useState(null);
+  // const [currWeatherData, setCurrWeatherData] = useState(null);
+  const [forecastData, setForecastData] = useState(null)
   const [weatherError, setWeatherError] = useState(null);
+
 
   const onSearchApp = async (searchText) => {
     try {
@@ -27,14 +29,17 @@ function App() {
       // matches the query returned from Search and Header components.
       // setWeatherData(searchText)
     // console.log(searchText)
-      const data = await WeatherService.getWeather(searchText);
+      const forecast = await WeatherService.getWeather(searchText);
       // Now that we can get the current weather data depending on search query,
       // we just need WeatherDisplay component to display the weather.
-      setWeatherData(data);
+      // setCurrWeatherData(forecast.current);
+      setForecastData(forecast)
       setWeatherError(null)
     } catch (error) {
-      setWeatherData(null)
+      // setCurrWeatherData(null)
+      setForecastData(null)
       setWeatherError(error)
+      throw new Error(error);
     }
 }
 
@@ -51,7 +56,7 @@ function App() {
       I think WeatherDisplay component would need the object returned by WeatherService.getWeather so that
       it can destructure the object.
       */}
-      <DisplayWeather weatherObj={weatherData} />
+      <DisplayWeather forecastWeather={forecastData} weatherError={weatherError} />
     </>
   )
 }

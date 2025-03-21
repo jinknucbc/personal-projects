@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
 
 function WeatherCard({cardData}) {
+  console.log("This is the card data: ", cardData)
     if (!cardData || !cardData.location || !cardData.current) {
         return <div>Loading...</div>
     }
 
+    // Celsius check is going to have to be moved to WeatherDisplay or App, because
+    // I don't want to create another button in ForecastCard component. So, this check
+    // be done in a parent, more general component and be passed down to child components.
     const [isCelsius, setIsCelsius] = useState(true)
 
     const handleClick = () => {
