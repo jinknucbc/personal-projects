@@ -55,6 +55,11 @@ function App() {
       
       I think WeatherDisplay component would need the object returned by WeatherService.getWeather so that
       it can destructure the object.
+
+        TO DO:
+        Pass location data and error to DisplayWeather so that it'll always default back to user's current location.
+        If the user doesn't agree to location sharing, display either an error or tell them to search a location.
+
       */}
       <DisplayWeather forecastWeather={forecastData} weatherError={weatherError} />
     </>

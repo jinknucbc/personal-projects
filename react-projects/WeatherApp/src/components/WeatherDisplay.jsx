@@ -1,16 +1,22 @@
-import React from 'react'
+import React, {useState} from 'react'
 import WeatherCard from './WeatherCard'
 import ForecastCard from './ForecastCard'
 
 function DisplayWeather({forecastWeather, weatherError}) {
+
+  let forecastArray = []
+
     if (!forecastWeather) {
         return <div>{weatherError}</div>
     }
 
     if (forecastWeather) {
-      console.log("This is current data: ", forecastWeather.current)
+      // console.log("This is current data: ", forecastWeather.current)
 
-      console.log("This is forecast data: ", forecastWeather)
+      // console.log("This is forecast data: ", forecastWeather)
+      forecastArray = forecastWeather.forecast.forecastday;
+      // console.log(forecastArray)
+      // forecastArray.map((item, index) => console.log(item.date, index))
     }
 
    
@@ -37,7 +43,9 @@ function DisplayWeather({forecastWeather, weatherError}) {
       because we'll be looping through the array, ForecastCard need only a single
       object passed into it as a prop.
       */}
-      <ForecastCard cardData={forecastWeather.forecast.forecastday[0]} />
+      <h2>Daily Forecast</h2>
+      {forecastArray ? forecastArray.map((element, index) => <ForecastCard key={index} cardData={element} />) : "No forecast"}
+      {/* <ForecastCard cardData={forecastWeather.forecast.forecastday[0]} /> */}
     </>
     // <div>Current temperature in Fahrenheit in {weatherObj.location.name} is {weatherObj.current.temp_f}</div>
     
