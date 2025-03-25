@@ -1,6 +1,6 @@
 import React from 'react'
 
-function ForecastCard({cardData}) {
+function ForecastCard({cardData, isCelsius}) {
 
     // let date = new Date(cardData.date)
     // let asDay = date.toLocaleDateString('en-us', {weekday: 'short'});
@@ -13,6 +13,9 @@ function ForecastCard({cardData}) {
     // console.log(dateParsed)
     // console.log(formattedDate)
     // console.log(asDay)
+
+    const maxTempDisplay = isCelsius ? cardData.day.maxtemp_c : cardData.day.maxtemp_f;
+    const minTempDisplay = isCelsius ? cardData.day.mintemp_c : cardData.day.mintemp_f;
 
   return (
     <>
@@ -32,6 +35,8 @@ function ForecastCard({cardData}) {
                   This goes for WeatherCard as well: default Forecast should be that of user's location. Again, if the user doesn't
                   agree to share location, then either display an error or tell them to search a location.
                 */}
+                <p>High: {maxTempDisplay}{isCelsius ? "°C" : "°F"}</p> 
+                <p>Low: {minTempDisplay}{isCelsius ? "°C" : "°F"}</p>
                 
             </div>
         </div>

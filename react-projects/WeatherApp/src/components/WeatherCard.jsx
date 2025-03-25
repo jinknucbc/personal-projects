@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
-function WeatherCard({cardData}) {
-  // console.log("This is the card data: ", cardData)
+function WeatherCard({cardData, onButtonClick, isCelsius}) {
+  console.log("This is the card data: ", cardData)
     if (!cardData || !cardData.location || !cardData.current) {
         return <div>Loading...</div>
     }
@@ -13,10 +13,10 @@ function WeatherCard({cardData}) {
     // Move this celsius check to either WeatherDisplay.jsx or App.jsx so that ForecastCard.jsx can also access it
     // Make this receive user's location data so that the default weather always shows that of user's location.
     // If user denies access, then either display an error or tell them to search a location.
-    const [isCelsius, setIsCelsius] = useState(true)
+    // const [isCelsius, setIsCelsius] = useState(true)
 
     const handleClick = () => {
-        setIsCelsius(!isCelsius);
+        onButtonClick();
     }
 
     const tempDisplay = isCelsius ? cardData.current.temp_c : cardData.current.temp_f;
