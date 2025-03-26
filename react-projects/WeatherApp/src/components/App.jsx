@@ -17,10 +17,21 @@ import DisplayWeather from './WeatherDisplay'
 
 
 function App() {
-  const {locationData, error: locationError} = FetchLocation();
+  // const {locationData, error: locationError} = FetchLocation();
+  const locationError = "";
+  const [locationData, setLocationData] = useState({
+    city: "",
+    country: "",
+    lat: 0,
+    long: 0,
+  })
+  // I'll likely need to define a state for locationError just in case there's an error retrieving the user's location
+  // in which case the automatic fetching of weather data and of rendering that data should not take place.
+
   // const [currWeatherData, setCurrWeatherData] = useState(null);
   const [forecastData, setForecastData] = useState(null)
   const [weatherError, setWeatherError] = useState(null);
+  const [userSearch, setUserSearch] = useState([""])
 
   // We might want to move searchText useState here so that DisplayWeather can be dependent on it
   // and we can take "getWeather" out of that. We can use useEffect to re-render when searchText
@@ -32,31 +43,52 @@ function App() {
   // can be used to re-render. I'm wondering if we'll need a useState that is essentially searchText
   // but be updated when onSearchApp function receives some value, in which case, that function won't return
   // anything, but it will change the state defined in this component.
-  
+  // useEffect(() => {
+  //   console.log(locationData.city)
+  // }, locationData)
 
   const onSearchApp = async (searchText) => {
-    try {
-      // This handler function should update weatherData so that it 
-      // matches the query returned from Search and Header components.
-      // setWeatherData(searchText)
-    // console.log(searchText)
+    console.log(searchText)
+    setUserSearch([searchText]);
     
-      const forecast = await WeatherService.getWeather(searchText, locationData);
-      // Now that we can get the current weather data depending on search query,
-      // we just need WeatherDisplay component to display the weather.
-      // setCurrWeatherData(forecast.current);
-      setForecastData(forecast)
-      setWeatherError(null)
-    } catch (error) {
-      // setCurrWeatherData(null)
-      setForecastData(null)
-      setWeatherError(error)
-      throw new Error(error);
+  }
+
+  const onFetch = (locData) => {
+    setLocationData(locData)
+    setUserSearch([locData.city])
+  }
+
+  // useEffect(() => {
+  //   try {
+  //     // This handler function should update weatherData so that it 
+  //     // matches the query returned from Search and Header components.
+  //     // setWeatherData(searchText)
+  //   // console.log(searchText)
+    
+  //     const forecast = WeatherService.getWeather(userSearch);
+  //     // Now that we can get the current weather data depending on search query,
+  //     // we just need WeatherDisplay component to display the weather.
+  //     // setCurrWeatherData(forecast.current);
+  //     setForecastData(forecast)
+  //     setWeatherError(null)
+  //   } catch (error) {
+  //     // setCurrWeatherData(null)
+  //     setForecastData(null)
+  //     setWeatherError(error)
+  //     throw new Error(error);
+  //   }
+  // })
+
+  useEffect(() => {
+    if (userSearch[0] !== '') {
+      WeatherService.getWeather(userSearch[0]).then((data) => setForecastData(data))
     }
-}
+  }, userSearch)
+
 
   return (
     <>
+      <FetchLocation onFetch={onFetch} />
       <Header onSearch={onSearchApp} userLocation={{locationData, locationError}}/>
       {/* We're going to need another major/macro component like Header where
       we can group body components into one so that that component manages all of

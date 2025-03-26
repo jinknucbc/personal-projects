@@ -2,9 +2,19 @@ import { useState, useEffect } from 'react'
 
 const geoAPI = import.meta.env.VITE_GEO_API;
 
-function FetchLocation() {
-    const [locationData, setLocationData] = useState(null);
+function FetchLocation({onFetch}) {
+    const [locationData, setLocationData] = useState({
+        city: "",
+        country: "",
+        lat: 0,
+        long: 0,
+    });
     const [error, setError] = useState(null)
+
+    const updateLocData = (locObj) => {
+        onFetch(locObj)
+    }
+
 
     useEffect(() => {
             // The process of getting user's location shouldn't affect the overall flow of the app
@@ -29,11 +39,12 @@ function FetchLocation() {
                                 // if match found and we get appropriate results, then we update city and country
                                 if (data.results && data.results.length > 0) {
                                     const result = data.results[0];
-                                    setLocationData({city: result.address_components.city || result.address_components.town || result.address_components.village,
+                                    updateLocData({city: result.address_components.city || result.address_components.town || result.address_components.village,
                                         country: result.address_components.country, 
                                         lat: position.coords.latitude, 
                                         long: position.coords.longitude
                                      })
+                                     
                                     // setCity(result.address_components.city || result.address_components.town || result.address_components.village);
                                     // setCountry(result.address_components.country);
                                 } else {
@@ -53,12 +64,11 @@ function FetchLocation() {
                 }
             };
             getLocation();
+            
         }, [])
 
-
-  return (
-    {locationData, error}
-  )
+  return null
+  
 }
 
 export default FetchLocation

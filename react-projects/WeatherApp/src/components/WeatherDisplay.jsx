@@ -47,7 +47,7 @@ function DisplayWeather({forecastWeather, weatherError}) {
       
       <div>
         <h2>Hourly Forecast</h2>
-        {hourlyForecast? hourlyForecast.map((element) => <HourlyForecast cardData={element} isCelsius={isCelsius} /> ) : "No hourly forecast"}
+        {hourlyForecast? hourlyForecast.map((element, index) => <HourlyForecast key={index} cardData={element} isCelsius={isCelsius} /> ) : "No hourly forecast"}
         {/* // <HourlyForecast cardData={hourlyForecast} isCelsius={isCelsius} /> */}
       </div>
       <h2>Daily Forecast</h2>
