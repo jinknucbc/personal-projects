@@ -22,6 +22,17 @@ function App() {
   const [forecastData, setForecastData] = useState(null)
   const [weatherError, setWeatherError] = useState(null);
 
+  // We might want to move searchText useState here so that DisplayWeather can be dependent on it
+  // and we can take "getWeather" out of that. We can use useEffect to re-render when searchText
+  // does come in or is different from the user's current location.
+
+  // onSearchApp function may need to return searchText value instead of calling "getWeather" from it.
+  // Basically, the current try-catch block will need to be independent of onSearchApp. Rather, we can
+  // make this dependent on userLocation and the new useState that we may or may not define. useEffect
+  // can be used to re-render. I'm wondering if we'll need a useState that is essentially searchText
+  // but be updated when onSearchApp function receives some value, in which case, that function won't return
+  // anything, but it will change the state defined in this component.
+  
 
   const onSearchApp = async (searchText) => {
     try {
@@ -29,7 +40,8 @@ function App() {
       // matches the query returned from Search and Header components.
       // setWeatherData(searchText)
     // console.log(searchText)
-      const forecast = await WeatherService.getWeather(searchText);
+    
+      const forecast = await WeatherService.getWeather(searchText, locationData);
       // Now that we can get the current weather data depending on search query,
       // we just need WeatherDisplay component to display the weather.
       // setCurrWeatherData(forecast.current);

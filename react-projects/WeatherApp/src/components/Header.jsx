@@ -7,10 +7,11 @@ function Header({onSearch, userLocation}) {
     onSearch(searchInput)
   }
 
+
   return (
     <>
     <div className="header-container">
-      <Search onSearch={handleSearch}/>
+      <Search onSearch={handleSearch} locationData={locationData} />
       <DisplayLocation locationData={locationData} error={locationError} />
       {/* <DarkMode /> */}
     </div>

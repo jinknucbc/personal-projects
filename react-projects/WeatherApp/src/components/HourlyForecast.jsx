@@ -5,7 +5,7 @@ function HourlyForecast({cardData, isCelsius}) {
     // const [today, tomorrow] = cardData
     console.log(cardData)
 
-    // const tempDisplay = 
+    const tempDisplay = isCelsius ? cardData.temp_c : cardData.temp_f;
 
     // The game plan is to show the hourly forecast of current day to 24 hours ahead of right now
     // which means we'll need two forecast arrays, index 0 and 1 where index 0 is the forecast of
@@ -21,7 +21,11 @@ function HourlyForecast({cardData, isCelsius}) {
     // The array that held two separate arrays with hourly forecast data have been flattened to a single array.
     // TO DO:
     // Loop through the single array and display those elements in a single div.
-    <div>HourlyForecast</div>
+    <>
+      <img src={cardData.condition.icon} />
+      <p>{tempDisplay}</p>
+      <p>{cardData.chance_of_rain > cardData.chance_of_snow ? cardData.chance_of_rain : cardData.chance_of_snow}</p>
+    </>
   )
 }
 

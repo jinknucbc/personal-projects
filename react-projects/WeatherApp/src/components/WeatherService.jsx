@@ -3,7 +3,7 @@ const weatherAPI = import.meta.env.VITE_WEATHER_API;
 const WeatherService = {
     // We need to set the default weather data to equal the user's location.
     // But first let me get that forecast data.
-    getWeather: async (searchQuery) => {
+    getWeather: async (searchQuery, userLocation) => {
         try {
             // let url;
             let forecastURL;

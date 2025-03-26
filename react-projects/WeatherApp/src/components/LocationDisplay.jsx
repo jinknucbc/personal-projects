@@ -74,12 +74,10 @@ function DisplayLocation({locationData, error}) {
 
     const {city, country, lat, long} = locationData;
 
-
-
   return (
     <div>
         <p>You're currently in</p>
-        <p>{city}, {country}, {lat}, {long}</p>
+        <p>{city}, {country}</p>
     </div>
   )
 }

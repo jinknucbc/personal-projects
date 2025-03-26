@@ -5,6 +5,9 @@ import HourlyForecast from './HourlyForecast'
 
 function DisplayWeather({forecastWeather, weatherError}) {
 
+  // By default, we should show the weather of the user's location. WeatherService component would have to return
+  // the weather data of user's location.
+
   const currTime = new Date().getHours();
 
   let forecastArray = []
@@ -35,17 +38,18 @@ function DisplayWeather({forecastWeather, weatherError}) {
       // console.log(hourlyForecast)
     }
 
-   
+  // TO DO:
+  // 
 
   return (
     <>
       <WeatherCard onButtonClick={onButton} cardData={forecastWeather} isCelsius={isCelsius} />
-      {/* TO DO:
-        Going to add hourly forecast now.
-      */}
-      <h2>Hourly Forecast</h2>
-      {/* {hourlyForecast? hourlyForecast.map((element) => <HourlyForecast cardData={element} isCelsius={isCelsius} /> ) : "No hourly forecast"} */}
-      {/* // <HourlyForecast cardData={hourlyForecast} isCelsius={isCelsius} /> */}
+      
+      <div>
+        <h2>Hourly Forecast</h2>
+        {hourlyForecast? hourlyForecast.map((element) => <HourlyForecast cardData={element} isCelsius={isCelsius} /> ) : "No hourly forecast"}
+        {/* // <HourlyForecast cardData={hourlyForecast} isCelsius={isCelsius} /> */}
+      </div>
       <h2>Daily Forecast</h2>
       {forecastArray ? forecastArray.map((element, index) => <ForecastCard key={index} isCelsius={isCelsius} cardData={element} />) : "No forecast"}
       
