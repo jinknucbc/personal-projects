@@ -3,7 +3,7 @@ import React from 'react'
 function HourlyForecast({cardData, isCelsius}) {
     
     // const [today, tomorrow] = cardData
-    console.log(cardData)
+    // console.log(cardData)
 
     const tempDisplay = isCelsius ? cardData.temp_c : cardData.temp_f;
 

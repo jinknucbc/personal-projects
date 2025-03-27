@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-function Search({onSearch, locationData}) {
+function Search({onSearch}) {
 
   // If we take searchText useState out of this component, then it'll need to receive searchText as a prop.
   // Actually, searchText may stay here because it is necessary to show feedback to user as they type.

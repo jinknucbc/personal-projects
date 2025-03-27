@@ -43,7 +43,7 @@ function DisplayWeather({forecastWeather, weatherError}) {
 
   return (
     <>
-      <WeatherCard onButtonClick={onButton} cardData={forecastWeather} isCelsius={isCelsius} />
+      {forecastWeather ? <WeatherCard onButtonClick={onButton} cardData={forecastWeather} isCelsius={isCelsius} /> : weatherError }
       
       <div>
         <h2>Hourly Forecast</h2>

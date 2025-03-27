@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import FetchLocation from './FetchLocation'
 
-function DisplayLocation({locationData, error}) {
+function DisplayLocation({locationData, error, weatherData}) {
     // const [city, setCity] = useState("")
     // const [country, setCountry] = useState("")
     // const [loading, setLoading] = useState(true)
@@ -69,17 +69,30 @@ function DisplayLocation({locationData, error}) {
     }
 
     if (!locationData) {
+      console.log("Check check check")
         return <div>Locating your area...</div>
     }
 
     const {city, country, lat, long} = locationData;
 
-  return (
-    <div>
-        <p>You're currently in</p>
-        <p>{city}, {country}</p>
-    </div>
-  )
+    if (locationData.city === '' || locationData.country === '') {
+      if (weatherData) {
+        return null
+      }
+      return (
+        <div>
+          <h2>There was an error locating your area. Please search by city or country.</h2>
+        </div>
+      )
+    }
+
+  //   return (
+  //     locationData.city !== '' || weatherData ? <div>
+  //       <p>You're currently in</p>
+  //       <p>{city}, {country}</p>
+  //   </div> : <h2>There was an error locating your area. Please search by city or country.</h2>
+    
+  // )
 }
 
 export default DisplayLocation

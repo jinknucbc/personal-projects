@@ -12,7 +12,7 @@ function FetchLocation({onFetch}) {
     const [error, setError] = useState(null)
 
     const updateLocData = (locObj) => {
-        onFetch(locObj)
+        onFetch(locObj, error)
     }
 
 
