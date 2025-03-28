@@ -48,8 +48,7 @@ function App() {
     <>
       <FetchLocation onFetch={onFetch} />
       <Header onSearch={onSearchApp} userLocation={{locationData, locationError}} weatherData={forecastData} />
-      {weatherError ? <h2>Invalid search. Please make sure there's no typo!</h2> : <DisplayWeather forecastWeather={forecastData} weatherError={weatherError} />}
-      {/* <DisplayWeather forecastWeather={forecastData} weatherError={weatherError} /> */}
+      {weatherError ? <h2 className="error-message">Invalid search. Please make sure there's no typo!</h2> : <DisplayWeather forecastWeather={forecastData} weatherError={weatherError} />}
     </>
   )
 }
