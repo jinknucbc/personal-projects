@@ -1,35 +1,38 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import ListDisplay from "./components/ListDisplay"
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        {/* <Header /> */}
+        {/* <CreateList /> this will likely be just a button */}
+        {
+        /* For now, I'm going to have "ListDisplay" here, but this will likely be put into a separate component called something like
+          ListBody or something...
+
+          Also, either in this component or in another, the application will need a textbox it'll need to pass its data to this component
+          anyway. "All roads lead to Rome" type of idea where this component is where all the existing components meet, whether directly or
+          indirectly through inheritance/prop passing. Meaning, data that will be global to all the components will be handled/managed here,
+          meaning their useState or other hooks will be defined here.
+
+          Actually, I think I'll show user input textbox only inside the list component, because I don't like the idea of having a huge textbox
+          just sitting in the general body of the application. It should appear only when the user is creating a list and has to type something in.
+          Now, I do want to have the title of each list displayed when we show the list of lists, so the list title and the first few words of the
+          list will have to be managed in this component. Key prop will be crucial in getting this done to make sure that what is briefly shown, when
+          actually clicked upon, is what really appears.
+
+        */
+        }
+        <ListDisplay />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
+
+// For now, I won't be working on the backend part as I just want to get the frontend functional.
+// The final form of this project, however, will have a header bar with Login and Dark Mode and Color Blind friendly mode.
 
 export default App
