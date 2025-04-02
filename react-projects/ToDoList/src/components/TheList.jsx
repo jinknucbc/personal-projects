@@ -1,11 +1,14 @@
 import React, {useState} from 'react'
 import ListItem from './ListItem'
+import ItemEdit from './ItemEdit'
 
 function TheList() {
 
     // List items should be stored in an array here
     const [userText, setUserText] = useState("")
     const [listItems, setListItems] = useState([])
+    const [selectItem, setSelectItem] = useState(null)
+    const [isEditable, setIsEditable] = useState(false)
 
     /*
         This component will likely contain two textboxes--title of the list and items to be added.
@@ -22,7 +25,7 @@ function TheList() {
    const addHandler = () => {
     if (userText.trim() !== '') {
         const itemToAdd = {
-            key: crypto.randomUUID,
+            key: crypto.randomUUID(),
             text: userText,
         }
         setListItems([...listItems, itemToAdd]);
@@ -30,17 +33,42 @@ function TheList() {
     }
    }
 
-//    const editHandler = () => {
-//     // Both this and removeHandler should trigger the selection function.
-//     alert("button clicked")
-//    }
+   const editHandler = () => {
+    // Both this and removeHandler should trigger the selection function.
+    // console.log(selectItem)
+    if (selectItem) {
+        listItems.find((itemObj) => itemObj.key === selectItem.key ? setIsEditable(!isEditable) : console.log("Not here"))
+    }
+   }
 
-//    const removeHandler = () => {
-//     alert("button clicked")
-//    }
+   const removeHandler = () => {
+    alert("button clicked")
+   }
 
    const handleItemClick = (item) => {
-    console.log(item)
+    if (!selectItem) {
+        setSelectItem(item)
+    }
+    else {
+        // For now, if selected item is selected again, it deselects.
+        setSelectItem(null)
+    }
+   }
+
+   const onSaveEdit = (editedItem) => {    
+    // console.log(listItems[0].key)
+    const updatedList = listItems.map((itemObj) => {
+        // console.log(itemObj.key, editedItem.key) 
+        return itemObj.key === editedItem.key ? editedItem : itemObj})
+    // console.log(updatedList)
+    setListItems(updatedList)
+    setSelectItem(null)
+    setIsEditable(!isEditable)
+   }
+
+   const onCancelEdit = () => {
+    setIsEditable(!isEditable)
+    setSelectItem(null)
    }
 
   return (
@@ -51,9 +79,11 @@ function TheList() {
         {/* The list title should appear here in level 2 or 3 heading */}
         <textarea onChange={onChange} value={userText} placeholder='Type something'></textarea>
         {listItems ? listItems.map((itemData, index) => <ListItem itemData={itemData} key={index} onClick={handleItemClick} />) : null}
-        <button onClick={addHandler}>Add</button> 
-        {/* <button onClick={editHandler}>Edit</button>
-        <button onClick={removeHandler}>Remove</button> */}
+        <button onClick={addHandler} disabled={selectItem}>Add</button> 
+        <button onClick={editHandler} disabled={!selectItem}>Edit</button>
+        <button onClick={removeHandler} disabled={!selectItem}>Remove</button>
+
+        {isEditable ? <ItemEdit currItem={selectItem} onSaveEdit={onSaveEdit} onCancelEdit={onCancelEdit} /> : null}
     </div>
 
     {/* // listItems.map((itemData, index) => <ListItem />) */}

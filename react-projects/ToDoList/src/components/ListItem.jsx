@@ -10,7 +10,10 @@ function ListItem({itemData, onClick}) {
         So, now, this component should be receiving the data from listItems array that is defined in TheList.jsx
     */
    const clickHandler = () => {
-    onClick(itemData.key)
+    onClick({
+      key: itemData.key,
+      text: itemData.text
+    })
    }
 
   return (
