@@ -9,6 +9,7 @@ function TheList() {
     const [listItems, setListItems] = useState([])
     const [selectItem, setSelectItem] = useState(null)
     const [isEditable, setIsEditable] = useState(false)
+    const [canSelect, setCanSelect] = useState(false)
 
     /*
         This component will likely contain two textboxes--title of the list and items to be added.
@@ -36,6 +37,9 @@ function TheList() {
    const editHandler = () => {
     // Both this and removeHandler should trigger the selection function.
     // console.log(selectItem)
+
+    setCanSelect(!canSelect)
+
     if (selectItem) {
         listItems.find((itemObj) => itemObj.key === selectItem.key ? setIsEditable(!isEditable) : console.log("Not here"))
     }
@@ -44,10 +48,17 @@ function TheList() {
    const removeHandler = () => {
     /*
         One of the ways we can "remove" an item is to use the key/ID of the item and then run either ".filter" method or construct a new
-        array and leave out the item whose key/ID matches that of the selected.
+        array and leave out the item whose key/ID matches that of the selected. Even for multi-select, this should work.
+        As far as multi-selecting is concerned, editing wouldn't need it because there should be no point to editing multiple things to
+        the same thing. What I'm thinking now is that we may do the operations in reverse order. Instead of clicking on an item to choose
+        between Edit and Remove, when the user clicks either, it should allow them to proceed with it. That way, if the user wants to remove
+        multiple items at once, they'll be able to do so while editing only one thing at a time.
+
+        Since Remove will allow multiple selections, it should keep an array of keys of selected items. Where we currently have ".filter" method,
+        we'll use a "foreach" loop on the array of keys. So, listItems array calls on either ".map" or ".filter", and then that other array is
+        going to be the main character of that "foreach" loop.
     */
    setListItems(listItems.filter((item) => {return item.key !== selectItem.key}))
-   console.log(newArray)
     // alert("button clicked")
    }
 
@@ -84,10 +95,16 @@ function TheList() {
     <div>
         {/* The list title should appear here in level 2 or 3 heading */}
         <textarea onChange={onChange} value={userText} placeholder='Type something'></textarea>
-        {listItems ? listItems.map((itemData, index) => <ListItem itemData={itemData} key={index} onClick={handleItemClick} />) : null}
+        {listItems ? listItems.map((itemData, index) => <ListItem itemData={itemData} key={index} onClick={handleItemClick} canSelect={canSelect} />) : null}
+        {/*
+            For the change I'm going to make, we're going to change the conditions here. Instead of Edit and Remove buttons depending on
+            selectItem condition, it'll now depend on the length of the listItems array. If 0, then the buttons are disabled. If not, if there
+            is at least one item that can be edited or removed, then it will be enabled. For Add button, the condition will still depend on
+            whether or not an item is selected. Once again, I do not see the point of duplicating items.
+        */}
         <button onClick={addHandler} disabled={selectItem}>Add</button> 
-        <button onClick={editHandler} disabled={!selectItem}>Edit</button>
-        <button onClick={removeHandler} disabled={!selectItem}>Remove</button>
+        <button onClick={editHandler} disabled={listItems.length === 0}>Edit</button>
+        <button onClick={removeHandler} disabled={listItems.length === 0}>Remove</button>
 
         {isEditable ? <ItemEdit currItem={selectItem} onSaveEdit={onSaveEdit} onCancelEdit={onCancelEdit} /> : null}
     </div>

@@ -1,6 +1,6 @@
 import React from 'react'
 
-function ListItem({itemData, onClick}) {
+function ListItem({itemData, onClick, canSelect}) {
 
     /* 
         Actually, I've moved the Edit and Remove buttons to "TheList" component as well, because I don't want to have multiple buttons
@@ -10,10 +10,13 @@ function ListItem({itemData, onClick}) {
         So, now, this component should be receiving the data from listItems array that is defined in TheList.jsx
     */
    const clickHandler = () => {
+    if (canSelect) {
+      console.log(canSelect)
     onClick({
       key: itemData.key,
       text: itemData.text
     })
+  }
    }
 
   return (
