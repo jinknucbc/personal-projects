@@ -42,7 +42,13 @@ function TheList() {
    }
 
    const removeHandler = () => {
-    alert("button clicked")
+    /*
+        One of the ways we can "remove" an item is to use the key/ID of the item and then run either ".filter" method or construct a new
+        array and leave out the item whose key/ID matches that of the selected.
+    */
+   setListItems(listItems.filter((item) => {return item.key !== selectItem.key}))
+   console.log(newArray)
+    // alert("button clicked")
    }
 
    const handleItemClick = (item) => {
