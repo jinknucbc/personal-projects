@@ -11,7 +11,6 @@ function ListItem({itemData, onClick, canSelect}) {
     */
    const clickHandler = () => {
     if (canSelect) {
-      console.log(canSelect)
     onClick({
       key: itemData.key,
       text: itemData.text

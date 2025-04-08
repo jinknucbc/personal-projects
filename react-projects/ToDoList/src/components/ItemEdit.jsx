@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 
 function ItemEdit({currItem, onSaveEdit, onCancelEdit}) {
     const [newText, setNewText] = useState(currItem.text)
-    // console.log(currItem)
 
     const handleChange = (event) => {
       setNewText(event.target.value)
@@ -25,7 +24,11 @@ function ItemEdit({currItem, onSaveEdit, onCancelEdit}) {
     <div>
         <textarea onChange={handleChange} value={newText}></textarea>
         <button onClick={handleSave}>Save</button>
-        <button onClick={handleCancel}>Cancel</button>
+        <button onClick={handleCancel}>Cancel</button> 
+        {/* 
+          Well, this Cancel button probably should be visible the moment the user presses either Edit or Remove button
+          well before they select an item, because they may change their mind and cancel out of that selection mode.
+        */}
     </div>
   )
 }
