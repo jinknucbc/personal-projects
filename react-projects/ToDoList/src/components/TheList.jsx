@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useRef, useEffect, useState} from 'react'
 import ListItem from './ListItem'
 import ItemEdit from './ItemEdit'
 import ItemRemove from './ItemRemove'
@@ -13,6 +13,7 @@ function TheList() {
     const [canSelect, setCanSelect] = useState(false)
     const [inRemoveMode, setInRemoveMode] = useState(false)
     const [removeSelected, setRemoveSelected] = useState([])
+    const listContainer = useRef(null)
 
     // Change isEditable to "editMode" and "canRemove" to "removeMode".
 
@@ -22,6 +23,22 @@ function TheList() {
         which will allow the user to type something new or different. It'll need access to the listItems array along
         with the index of selected item.
     */
+
+    useEffect(() => {
+        const handleOutSideClick = (event) => {
+
+            if (canSelect && !listContainer.current.contains(event.target)) {
+                setCanSelect(!canSelect)
+                setInEditMode(!inEditMode)
+                setInRemoveMode(!inRemoveMode)
+                setSelectItem(null)
+                setRemoveSelected([])
+            }
+        }
+        document.addEventListener("mousedown", handleOutSideClick)
+
+        return () => {document.removeEventListener("mousedown", handleOutSideClick)}
+    }, [canSelect, listContainer])
 
     const onChange = (event) => {
         // console.log(event.target.value)
@@ -44,6 +61,7 @@ function TheList() {
     // console.log(selectItem)
     // console.log("This is before it is negated in Edit: ", canSelect)
     if (!canSelect) {
+        console.log("Testing testing")
         setCanSelect(!canSelect)
     }
     // if (inRemoveMode) {
@@ -94,6 +112,9 @@ function TheList() {
     if (removeSelected) {
         setListItems(listItems.filter((item) => !removeSelected.includes(item.key)))
     }
+    setRemoveSelected([])
+    setInRemoveMode(!inRemoveMode)
+    setCanSelect(!canSelect)
    }
 
    const onCancelRemove = () => {
@@ -103,9 +124,13 @@ function TheList() {
     if (removeSelected) {
         setRemoveSelected([])
     }
+    setRemoveSelected([])
+    setInRemoveMode(!inRemoveMode)
+    setCanSelect(!canSelect)
    }
 
    const handleItemClick = (item) => {
+    // console.log(listContainer.current)
     // console.log(selectItem)
     // console.log(canSelect)
     // if (!selectItem) {
@@ -124,7 +149,7 @@ function TheList() {
     //     }
     //     // console.log(removeSelected)
     // } 
-    if (inEditMode) {
+    if (inEditMode && canSelect) {
         setRemoveSelected([])
         if (!selectItem) {
             setSelectItem(item)
@@ -132,16 +157,22 @@ function TheList() {
         else {
             setSelectItem(null)
         }
-    } else if (inRemoveMode) {
+    } else if (inRemoveMode && canSelect) {
         setSelectItem(null)
-        setRemoveSelected([...removeSelected, item.key])
+        if (!removeSelected.includes(item.key)) {
+            // If first time selecting, then add to array
+            setRemoveSelected([...removeSelected, item.key])
+        } else {
+            // If not first time selecting, then deselect
+            setRemoveSelected(removeSelected.filter((element) => {return element !== item.key}))
+        }
     }
     else {
         // For now, if selected item is selected again, it deselects.
         setSelectItem(null)
     }
-    console.log(selectItem)
-    console.log(removeSelected)
+    // console.log(selectItem)
+    // console.log(removeSelected)
    }
 
    const onSaveEdit = (editedItem) => {    
@@ -166,7 +197,7 @@ function TheList() {
     <>
     {/* The said list items array should use ".map()" or any method like that to display all the items here */}
 
-    <div>
+    <div ref={listContainer} >
         {/* The list title should appear here in level 2 or 3 heading */}
         <textarea onChange={onChange} value={userText} placeholder='Type something'></textarea>
         {listItems ? listItems.map((itemData, index) => <ListItem itemData={itemData} key={index} onClick={canSelect ? handleItemClick : null} canSelect={canSelect} />) : null}
@@ -181,7 +212,7 @@ function TheList() {
         <button onClick={removeHandler} disabled={listItems.length === 0}>Remove</button>
 
         {inEditMode && selectItem ? <ItemEdit currItem={selectItem} onSaveEdit={onSaveEdit} onCancelEdit={onCancelEdit} /> : null}
-        {inRemoveMode ? <ItemRemove onConfirmRemove={onConfirmRemove} onCancelRemove={onCancelRemove} /> : null}
+        {inRemoveMode ? <ItemRemove onConfirmRemove={onConfirmRemove} onCancelRemove={onCancelRemove} selectedItems={removeSelected} /> : null}
     </div>
 
     {/* // listItems.map((itemData, index) => <ListItem />) */}

@@ -1,6 +1,6 @@
 import React from 'react'
 
-function ItemRemove({onConfirmRemove, onCancelRemove}) {
+function ItemRemove({onConfirmRemove, onCancelRemove, selectedItems}) {
     const handleConfirm = () => {
         onConfirmRemove()
     }
@@ -11,8 +11,8 @@ function ItemRemove({onConfirmRemove, onCancelRemove}) {
 
   return (
     <div>
-        <button onClick={handleConfirm}>Confirm</button>
-        <button onClick={handleCancel}>Cancel</button>
+        <button onClick={handleConfirm} disabled={selectedItems.length === 0} >Confirm</button>
+        <button onClick={handleCancel} >Cancel</button>
     </div>
   )
 }
