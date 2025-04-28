@@ -1,9 +1,11 @@
-import React, {useRef, useEffect, useState} from 'react'
+import React, {useRef, useEffect, useState, useContext} from 'react'
 import ListItem from './ListItem'
 import ItemEdit from './ItemEdit'
 import ItemRemove from './ItemRemove'
+import { useNavigate, useParams } from 'react-router-dom'
+import {ContextContainer} from "./ListContext"
 
-function TheList() {
+function TheList({isNew}) {
 
     // List items should be stored in an array here
     const [userText, setUserText] = useState("")
@@ -14,8 +16,10 @@ function TheList() {
     const [inRemoveMode, setInRemoveMode] = useState(false)
     const [removeSelected, setRemoveSelected] = useState([])
     const listContainer = useRef(null)
-
-    // Change isEditable to "editMode" and "canRemove" to "removeMode".
+    const [currentList, setCurrentList] = useState(null)
+    const {id} = useParams()
+    const {onCreateList} = useContext(ContextContainer)
+    const nav = useNavigate();
 
     /*
         This component will likely contain two textboxes--title of the list and items to be added.
@@ -25,8 +29,8 @@ function TheList() {
     */
 
     useEffect(() => {
+        
         const handleOutSideClick = (event) => {
-
             if (canSelect && !listContainer.current.contains(event.target)) {
                 setCanSelect(!canSelect)
                 setInEditMode(!inEditMode)
@@ -39,6 +43,12 @@ function TheList() {
 
         return () => {document.removeEventListener("mousedown", handleOutSideClick)}
     }, [canSelect, listContainer])
+
+    useEffect(() => {
+        if (isNew) {
+            console.log("Here we are because this is new.")
+        }
+    }, [id, isNew])
 
     const onChange = (event) => {
         // console.log(event.target.value)
@@ -58,23 +68,11 @@ function TheList() {
 
    const editHandler = () => {
     // Both this and removeHandler should trigger the selection function.
-    // console.log(selectItem)
-    // console.log("This is before it is negated in Edit: ", canSelect)
     if (!canSelect) {
-        console.log("Testing testing")
         setCanSelect(!canSelect)
     }
-    // if (inRemoveMode) {
-    //     setInRemoveMode(!inRemoveMode)
-    //     setRemoveSelected([])
-    // }
     setInEditMode(!inEditMode)
 
-
-    // if (canSelect) {
-    //     console.log(selectItem)
-    //     listItems.find((itemObj) => itemObj.key === selectItem.key ? setIsEditable(!isEditable) : console.log("Not here"))
-    // }
    }
 
    const removeHandler = () => {
@@ -90,21 +88,12 @@ function TheList() {
         we'll use a "foreach" loop on the array of keys. So, listItems array calls on either ".map" or ".filter", and then that other array is
         going to be the main character of that "foreach" loop.
     */
-//    setListItems(listItems.filter((item) => {return item.key !== selectItem.key}))
-    // alert("button clicked")
-    // console.log("This is before it is negated in Remove: ", canSelect)
     if (!inRemoveMode) {
         setInRemoveMode(!inRemoveMode)
     }
     if (!canSelect) {
         setCanSelect(!canSelect)
     }
-    // if (inEditMode) {
-    //     setInEditMode(!inEditMode)
-    //     setSelectItem(null)
-    // }
-    
-    // Gonna need a separate "Confirm" and "Cancel" button for Remove mode.
 
    }
 
@@ -130,25 +119,8 @@ function TheList() {
    }
 
    const handleItemClick = (item) => {
-    // console.log(listContainer.current)
-    // console.log(selectItem)
-    // console.log(canSelect)
-    // if (!selectItem) {
-    //     // This checks if there is an item currently selected. If not, we set the item received as the selected item.
-    //     // I think one of the things I was considering was to check if Edit or Remove mode is activated, and, depending
-    //     // on whichever mode, either set it as THE selected item or just add the currently selected item into an array.
-    //     // What that means is we'd need two separate item trackers
-    //     // console.log("Yeah we're here")
-
-    //     if (inEditMode) {
-    //         setSelectItem(item)
-    //     }
-    //     else if (inRemoveMode) {
-    //         setRemoveSelected([...removeSelected, item.key])
-    //         // console.log(item.key)
-    //     }
-    //     // console.log(removeSelected)
-    // } 
+    console.log(listItems)
+    
     if (inEditMode && canSelect) {
         setRemoveSelected([])
         if (!selectItem) {
@@ -171,16 +143,12 @@ function TheList() {
         // For now, if selected item is selected again, it deselects.
         setSelectItem(null)
     }
-    // console.log(selectItem)
-    // console.log(removeSelected)
+
    }
 
    const onSaveEdit = (editedItem) => {    
-    // console.log(listItems[0].key)
     const updatedList = listItems.map((itemObj) => {
-        // console.log(itemObj.key, editedItem.key) 
         return itemObj.key === editedItem.key ? editedItem : itemObj})
-    // console.log(updatedList)
     setListItems(updatedList)
     setSelectItem(null)
     setCanSelect(!canSelect)
@@ -193,6 +161,13 @@ function TheList() {
     setSelectItem(null)
    }
 
+   const handleCreate = () => {
+    // This is after that "finish" button is pressed, meaning this will only be active when we're dealing with a completely new list.
+    // That being the case, we'll still need a manager function coming from MainScreen.jsx so that this can be "broadcast" to that component.
+    // And that's when we can pass the list object to "MainScreen.jsx" and include it in the overall list array.
+    onCreateList()
+   }
+
   return (
     <>
     {/* The said list items array should use ".map()" or any method like that to display all the items here */}
@@ -201,15 +176,10 @@ function TheList() {
         {/* The list title should appear here in level 2 or 3 heading */}
         <textarea onChange={onChange} value={userText} placeholder='Type something'></textarea>
         {listItems ? listItems.map((itemData, index) => <ListItem itemData={itemData} key={index} onClick={canSelect ? handleItemClick : null} canSelect={canSelect} />) : null}
-        {/*
-            For the change I'm going to make, we're going to change the conditions here. Instead of Edit and Remove buttons depending on
-            selectItem condition, it'll now depend on the length of the listItems array. If 0, then the buttons are disabled. If not, if there
-            is at least one item that can be edited or removed, then it will be enabled. For Add button, the condition will still depend on
-            whether or not an item is selected. Once again, I do not see the point of duplicating items.
-        */}
         <button onClick={addHandler} disabled={canSelect}>Add</button> 
         <button onClick={editHandler} disabled={listItems.length === 0}>Edit</button>
         <button onClick={removeHandler} disabled={listItems.length === 0}>Remove</button>
+        <button onClick={handleCreate}>Finish</button>
 
         {inEditMode && selectItem ? <ItemEdit currItem={selectItem} onSaveEdit={onSaveEdit} onCancelEdit={onCancelEdit} /> : null}
         {inRemoveMode ? <ItemRemove onConfirmRemove={onConfirmRemove} onCancelRemove={onCancelRemove} selectedItems={removeSelected} /> : null}
