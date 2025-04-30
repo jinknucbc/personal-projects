@@ -6,7 +6,7 @@ const WeatherService = {
             onWeatherError(null)
             let forecastURL;
             if (searchQuery) {
-                forecastURL = `http://api.weatherapi.com/v1/forecast.json?key=${weatherAPI}&q=${searchQuery}&days=8`
+                forecastURL = `https://api.weatherapi.com/v1/forecast.json?key=${weatherAPI}&q=${searchQuery}&days=8`
             }
             let forecastRes = await fetch(forecastURL)
             if (!forecastRes.ok) {
