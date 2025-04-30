@@ -18,7 +18,7 @@ function TheList({isNew}) {
     const listContainer = useRef(null)
     const [currentList, setCurrentList] = useState(null)
     const {id} = useParams()
-    const {onCreateList} = useContext(ContextContainer)
+    const {onCreateList, listArray} = useContext(ContextContainer)
     const nav = useNavigate();
 
     /*
@@ -46,9 +46,24 @@ function TheList({isNew}) {
 
     useEffect(() => {
         if (isNew) {
-            console.log("Here we are because this is new.")
+            console.log("Can we get here?")
+            setCurrentList({
+                key: id,
+                title: "New List",
+                content: []
+            })
+            console.log(currentList)
+        } else {
+            console.log(listArray)
         }
     }, [id, isNew])
+
+    useEffect(() => {
+        if (currentList && listItems) {
+            setCurrentList({ ...currentList, content: [listItems]})
+        }
+        console.log(currentList)
+    }, [listItems])
 
     const onChange = (event) => {
         // console.log(event.target.value)
@@ -62,6 +77,7 @@ function TheList({isNew}) {
             text: userText,
         }
         setListItems([...listItems, itemToAdd]);
+        // setCurrentList({...currentList, content: []})
         setUserText('')
     }
    }
@@ -165,14 +181,25 @@ function TheList({isNew}) {
     // This is after that "finish" button is pressed, meaning this will only be active when we're dealing with a completely new list.
     // That being the case, we'll still need a manager function coming from MainScreen.jsx so that this can be "broadcast" to that component.
     // And that's when we can pass the list object to "MainScreen.jsx" and include it in the overall list array.
-    onCreateList()
+    console.log(onCreateList)
+    onCreateList(currentList)
+   }
+
+   const handleChangeTitle = (e) => {
+    setCurrentList({...currentList, title: e.target.value })
+   }
+
+   if (!currentList) {
+    return <div>Creating a list...</div>
    }
 
   return (
     <>
     {/* The said list items array should use ".map()" or any method like that to display all the items here */}
-
+    
     <div ref={listContainer} >
+        <h2>{currentList.title}</h2>
+        <input type="text" placeholder='Put the title here...' value={currentList.title} onChange={handleChangeTitle} />
         {/* The list title should appear here in level 2 or 3 heading */}
         <textarea onChange={onChange} value={userText} placeholder='Type something'></textarea>
         {listItems ? listItems.map((itemData, index) => <ListItem itemData={itemData} key={index} onClick={canSelect ? handleItemClick : null} canSelect={canSelect} />) : null}

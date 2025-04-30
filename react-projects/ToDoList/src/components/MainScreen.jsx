@@ -1,12 +1,13 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useContext } from 'react'
 import ListCard from "../components/ListCard"
 import { useNavigate } from 'react-router-dom'
+import { ContextContainer } from './ListContext'
 
 function MainScreen() {
   // This main screen will need access to the array of lists, at least the short version of them.
   // This is where list cards will be displayed.
 
-  const [listArray, setListArray] = useState([])
+  const {listArray} = useContext(ContextContainer)
   // This is likely to be an array of objects containing the ID of the array and the contents.
 
   const [listPreview, setListPreview] = useState([])
@@ -20,11 +21,11 @@ function MainScreen() {
 
   const handleCreate = () => {
     const newID = crypto.randomUUID()
-    const newList = {
-      key: newID,
-      title: "New List",
-      content: []
-    }
+    // const newList = {
+    //   key: newID,
+    //   title: "New List",
+    //   content: []
+    // }
     // setListArray([...listArray, newList])
     nav(`/list/${newID}/new`)
   }
@@ -42,6 +43,8 @@ function MainScreen() {
         <button onClick={handleCreate}>Create</button>
         <button disabled={listArray.length === 0}>Edit</button>
         <button disabled={listArray.length === 0}>Remove</button>
+          {console.log(listArray)}
+
       </div>
     </>
     
