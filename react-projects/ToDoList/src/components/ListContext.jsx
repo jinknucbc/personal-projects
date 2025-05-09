@@ -12,7 +12,7 @@ export const ContextProvider = ({children}) => {
         // Keep in mind, this will be called after "Finish" button has been pressed.
         // Once everything's confirmed, add the new list to the overall array and take the
         // user back to the main screen.
-        console.log("Check check")
+        // console.log("Check check")
         setListArray((oldLists) => [...oldLists, newList])
         nav("/")
     }, [nav, setListArray])

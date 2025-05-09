@@ -33,6 +33,7 @@ function App() {
             <Route path="/" element={<MainScreen />} />
             <Route path="/list/:id" element={<TheList />} />
             <Route path="/list/:id/new" element={<TheList isNew={true} />} />
+            <Route path="/list/:id/edit" element={<TheList isNew={false} />} />
             {/* This should render "MainScreen" component. <MainScreen /> */}
 
         </Routes>

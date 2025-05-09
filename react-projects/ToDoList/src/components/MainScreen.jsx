@@ -10,12 +10,11 @@ function MainScreen() {
   const {listArray} = useContext(ContextContainer)
   // This is likely to be an array of objects containing the ID of the array and the contents.
 
-  const [listPreview, setListPreview] = useState([])
-
-  // This should change to "true" only when the user presses "Create" button
-
-
-  // useEffect(() => {}, listArray)
+  // const [listPreview, setListPreview] = useState([])
+  const [canSelect, setCanSelect] = useState(false)
+  // const [inEditMode, setInEditMode] = useState(false)
+  const [inRemoveMode, setInRemoveMode] = useState(false)
+  const [removeSelected, setRemoveSelected] = useState([])
 
   const nav = useNavigate()
 
@@ -30,6 +29,16 @@ function MainScreen() {
     nav(`/list/${newID}/new`)
   }
 
+  const handleOpen = () => {
+
+  }
+
+  // const handleEdit = () => {
+  //   setInRemoveMode(false)
+  //   !canSelect ? setCanSelect(true) : setCanSelect(false)
+  //   !inEditMode ? setInEditMode(true) : setInEditMode(false)
+  // }
+
 
   return (
     <>
@@ -40,8 +49,11 @@ function MainScreen() {
           a new list is created or an existing one is either edited or deleted. We'll be needing a "useEffect" hook so that
           we can have conditional re-rendering.
         */}
-        <button onClick={handleCreate}>Create</button>
-        <button disabled={listArray.length === 0}>Edit</button>
+        <div onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} style={{borderColor: "red", border: "solid"}}>
+          {listArray.length > 0 ? listArray.map((list) => <ListCard key={list.key} listKey={list.key} listTitle={list.title} contentArray={list.content} />) : null}
+        </div>
+        <button onClick={handleCreate} disabled={canSelect}>Create</button>
+        {/* <button onClick={handleEdit} disabled={listArray.length === 0}>Edit</button> */}
         <button disabled={listArray.length === 0}>Remove</button>
           {console.log(listArray)}
 
