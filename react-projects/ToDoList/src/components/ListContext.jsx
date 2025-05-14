@@ -17,10 +17,24 @@ export const ContextProvider = ({children}) => {
         nav("/")
     }, [nav, setListArray])
 
+    const updateList = useCallback((listKey, newContent) => {
+        // Probably could use the list ID here so we can apply the change only to the list that has matching ID.
+        // Right now, it is updating every item in every list.
+        // console.log(newContent) // newContent is an array of item objects
+        listArray.map((listObj) => {
+            if (listObj.key === listKey) {
+                listObj.content = newContent
+            }
+        })
+        // console.log(listArray)
+    }, [nav, setListArray])
+
     const contextValue = {
         // Actual things that will be sent out to child components
         listArray: listArray,
-        onCreateList: onCreateList
+        setListArray: setListArray,
+        onCreateList: onCreateList,
+        updateList: updateList
     }
 
     return (

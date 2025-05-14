@@ -1,6 +1,7 @@
 import React from 'react'
 
 function ListItem({itemData, onClick, canSelect}) {
+  // console.log(itemData)
 
     /* 
         Actually, I've moved the Edit and Remove buttons to "TheList" component as well, because I don't want to have multiple buttons

@@ -1,7 +1,12 @@
-import React from 'react'
+import React, { useRef } from 'react'
 
-function ListCard({listKey, listTitle, contentArray}) {
+function ListCard({listKey, listTitle, contentArray, 
+  onOpen, onListToRemove, enableRemove, isInSelectMode}) {
 
+    const holdTimer = useRef(null)
+    const isHolding = useRef(false)
+
+    const timeToHold = 1500
 
   // This component should show the summary of each list, and there will be more than one card displayed.
   // What that means is we'll need a component that calls on this. Basically, this is responsible for what
@@ -22,17 +27,50 @@ function ListCard({listKey, listTitle, contentArray}) {
   // }, contentArray)
 
   // const handleOnOpen = () => {
-    // onOpen(listKey)
-  // } this function should be 
+  //   onOpen(listKey)
+  // }
+
+  const handleMouseDown = () => {
+    isHolding.current = true;
+    holdTimer.current = setTimeout(() => {
+      // console.log("Yeah it's working")
+      if (isHolding.current) {
+        enableRemove()
+      }
+    }, timeToHold)
+  }
+
+  const handleMouseUp = () => {
+    // console.log("Mouse is officially up")
+    // We need to check if the time held is less than the designated time. If it is, then we'll clear the timeout and open that list.
+    isHolding.current = false
+    if (holdTimer.current && holdTimer.current < timeToHold) {
+      console.log(holdTimer.current)
+      clearTimeout(holdTimer.current)
+      onOpen(listKey)
+    }
+    clearTimeout(holdTimer.current)
+    holdTimer.current = null
+  }
+
+  const onClickList = () => {
+    if (isInSelectMode) {
+      onListToRemove(listKey)
+    }
+  }
 
   return (
     <>
-    <div style={{border: "dashed"}}>
+    <div onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onClick={onClickList} style={{border: "dashed"}}>
       {listTitle}
       {/* {console.log(itemText)} */}
       <div>
         {/* {contentArray.map((item) => console.log(item))} */}
-        {contentArray.map((listItem) => listItem.map((item, index) => {return <ul key={index}>{item.text}</ul>}) )}
+        {contentArray.map((listItem, index) => {
+          if (index < 3) {
+            return <ul key={index}>{listItem.text}</ul>
+          }
+        })}
       </div>
     </div>
     </>

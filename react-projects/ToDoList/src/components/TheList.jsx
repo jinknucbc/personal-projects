@@ -18,7 +18,7 @@ function TheList({isNew}) {
     const listContainer = useRef(null)
     const [currentList, setCurrentList] = useState(null)
     const {id} = useParams()
-    const {onCreateList, listArray} = useContext(ContextContainer)
+    const {onCreateList, listArray, updateList} = useContext(ContextContainer)
     const nav = useNavigate();
 
     /*
@@ -55,14 +55,20 @@ function TheList({isNew}) {
             console.log(currentList)
         } else {
             console.log(currentList)
+            const fetchList = listArray.find((lists) => lists.key === id)
+            // console.log(fetchList)
+            if (fetchList) {
+                setCurrentList(fetchList)
+                // if (!listItems)
+            }
         }
     }, [id, isNew])
 
     useEffect(() => {
         if (currentList && listItems) {
-            setCurrentList({ ...currentList, content: [listItems]})
+            setCurrentList({ ...currentList, content: listItems})
         }
-        console.log(currentList)
+        // console.log(currentList)
     }, [listItems])
 
     const onChange = (event) => {
@@ -76,8 +82,8 @@ function TheList({isNew}) {
             key: crypto.randomUUID(),
             text: userText,
         }
-        setListItems([...listItems, itemToAdd]);
-        // setCurrentList({...currentList, content: []})
+        // setListItems([...listItems, itemToAdd]);
+        setCurrentList((prevList) => ({...prevList, content: [...prevList.content, itemToAdd]}))
         setUserText('')
     }
    }
@@ -115,7 +121,8 @@ function TheList({isNew}) {
 
    const onConfirmRemove = () => {
     if (removeSelected) {
-        setListItems(listItems.filter((item) => !removeSelected.includes(item.key)))
+        // Probably better to have a temporary variable to store the changed content array and then reassign the content array with that...
+        setCurrentList((prevList) => ({...prevList, content: prevList.content.filter((item) => !removeSelected.includes(item.key))}))
     }
     setRemoveSelected([])
     setInRemoveMode(!inRemoveMode)
@@ -135,7 +142,7 @@ function TheList({isNew}) {
    }
 
    const handleItemClick = (item) => {
-    console.log(listItems)
+    // console.log(listItems)
     
     if (inEditMode && canSelect) {
         setRemoveSelected([])
@@ -163,9 +170,9 @@ function TheList({isNew}) {
    }
 
    const onSaveEdit = (editedItem) => {    
-    const updatedList = listItems.map((itemObj) => {
+    const updatedList = currentList.content.map((itemObj) => {
         return itemObj.key === editedItem.key ? editedItem : itemObj})
-    setListItems(updatedList)
+    setCurrentList((prevList) => ({...prevList, content: updatedList}))
     setSelectItem(null)
     setCanSelect(!canSelect)
     setInEditMode(!inEditMode)
@@ -177,12 +184,17 @@ function TheList({isNew}) {
     setSelectItem(null)
    }
 
-   const handleCreate = () => {
+   const handleFinish = () => {
     // This is after that "finish" button is pressed, meaning this will only be active when we're dealing with a completely new list.
     // That being the case, we'll still need a manager function coming from MainScreen.jsx so that this can be "broadcast" to that component.
     // And that's when we can pass the list object to "MainScreen.jsx" and include it in the overall list array.
     // console.log(onCreateList)
-    onCreateList(currentList)
+    if (isNew) {
+        onCreateList(currentList)
+    } else {
+        updateList(id, currentList.content)
+        nav("/")
+    }
    }
 
    const handleChangeTitle = (e) => {
@@ -190,13 +202,15 @@ function TheList({isNew}) {
    }
 
    if (!currentList) {
+    // console.log(id)
+    // console.log(listArray)
     return <div>Creating a list...</div>
    }
 
   return (
     <>
     {/* The said list items array should use ".map()" or any method like that to display all the items here */}
-    
+    {/* {console.log(currentList)} */}
     <div ref={listContainer} style={{border: "solid"}} >
         <div>
             <h2>{currentList.title}</h2>
@@ -205,12 +219,12 @@ function TheList({isNew}) {
         {/* The list title should appear here in level 2 or 3 heading */}
         <div>
             <textarea onChange={onChange} value={userText} placeholder='Type something'></textarea>
-            {listItems ? listItems.map((itemData, index) => <ListItem itemData={itemData} key={index} onClick={canSelect ? handleItemClick : null} canSelect={canSelect} />) : null}
+            {currentList.content && currentList.content.map((itemData, index) => <ListItem itemData={itemData} key={index} onClick={canSelect ? handleItemClick : null} canSelect={canSelect} />)}
         </div>
         <button onClick={addHandler} disabled={canSelect}>Add</button> 
-        <button onClick={editHandler} disabled={listItems.length === 0}>Edit</button>
-        <button onClick={removeHandler} disabled={listItems.length === 0}>Remove</button>
-        <button onClick={handleCreate}>Finish</button>
+        <button onClick={editHandler} disabled={currentList.content.length === 0}>Edit</button>
+        <button onClick={removeHandler} disabled={currentList.content.length === 0}>Remove</button>
+        <button onClick={handleFinish}>Finish</button>
 
         {inEditMode && selectItem ? <ItemEdit currItem={selectItem} onSaveEdit={onSaveEdit} onCancelEdit={onCancelEdit} /> : null}
         {inRemoveMode ? <ItemRemove onConfirmRemove={onConfirmRemove} onCancelRemove={onCancelRemove} selectedItems={removeSelected} /> : null}
