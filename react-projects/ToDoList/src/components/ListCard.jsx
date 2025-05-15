@@ -1,7 +1,7 @@
 import React, { useRef } from 'react'
 
 function ListCard({listKey, listTitle, contentArray, 
-  onOpen, onListToRemove, enableRemove, isInSelectMode}) {
+  onOpen, onListToRemove, enableRemove, isInSelectMode, isInRemoveMode}) {
 
     const holdTimer = useRef(null)
     const isHolding = useRef(false)
@@ -44,8 +44,8 @@ function ListCard({listKey, listTitle, contentArray,
     // console.log("Mouse is officially up")
     // We need to check if the time held is less than the designated time. If it is, then we'll clear the timeout and open that list.
     isHolding.current = false
-    if (holdTimer.current && holdTimer.current < timeToHold) {
-      console.log(holdTimer.current)
+    if (holdTimer.current && holdTimer.current < timeToHold && !isInRemoveMode) {
+      // console.log(holdTimer.current)
       clearTimeout(holdTimer.current)
       onOpen(listKey)
     }

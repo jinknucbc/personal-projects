@@ -52,9 +52,9 @@ function TheList({isNew}) {
                 title: "New List",
                 content: []
             })
-            console.log(currentList)
+            // console.log(currentList)
         } else {
-            console.log(currentList)
+            // console.log(currentList)
             const fetchList = listArray.find((lists) => lists.key === id)
             // console.log(fetchList)
             if (fetchList) {

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useRef, useEffect } from 'react'
 import ListCard from "../components/ListCard"
 import { useNavigate } from 'react-router-dom'
 import { ContextContainer } from './ListContext'
@@ -15,8 +15,25 @@ function MainScreen() {
   // const [inEditMode, setInEditMode] = useState(false)
   const [inRemoveMode, setInRemoveMode] = useState(false)
   const [removeSelected, setRemoveSelected] = useState([])
+  const cardContainer = useRef(null)
 
   const nav = useNavigate()
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (cardContainer.current && canSelect && !cardContainer.current.contains(event.target))
+      {
+        setRemoveSelected([])
+        setInRemoveMode(false)
+        setCanSelect(false)
+      }
+    }
+    if (inRemoveMode) {
+      document.addEventListener("mouseup", handleOutsideClick)
+      return () => {document.removeEventListener("mouseup", handleOutsideClick)}
+    }
+    
+  }, [cardContainer, removeSelected])
 
   const handleCreate = () => {
     const newID = crypto.randomUUID()
@@ -81,7 +98,7 @@ function MainScreen() {
 
   return (
     <>
-      <div>
+      <div ref={cardContainer} style={{border: "dotted", borderColor: "blue"}}>
         {/* 
           Some kind of loop over the list array and call "ListCard" in it. This list array, then, will have to contain
           either the short version of each list or the actual list object. This array would have to be updated each time
