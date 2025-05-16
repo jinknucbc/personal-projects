@@ -1,11 +1,35 @@
 import"./App.css"
-import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import MainScreen from './components/MainScreen'
 import TheList from './components/TheList'
 import {ContextProvider} from "./components/ListContext"
+import { auth } from "./firebaseConfig"
+import { onAuthStateChanged } from "firebase/auth"
+import LoginScreen from "./components/LoginScreen"
+import SignUpScreen from "./components/SignUpScreen"
 
 function App() {
+
+  const [user, setUser] = useState(null) // Assume that the user is not logged in yet
+  const [loading, setLoading] = useState(true) // And following that assumption, we set loading to true
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+      if (authUser) {
+        setUser(authUser)
+      } else {
+        setUser(null)
+      }
+    })
+    setLoading(false)
+
+    return () => unsubscribe()
+  }, [])
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
 
   return (
     <BrowserRouter>
@@ -30,7 +54,10 @@ function App() {
 
             */
             }
-            <Route path="/" element={<MainScreen />} />
+            <Route path="/" element={user ? <MainScreen user={user} /> : <Navigate to="/login" replace /> } />
+            <Route path="/login" element={<LoginScreen />} />
+            <Route path="/signup" element={<SignUpScreen />} />
+            {/* We most likely will have to update the paths now for components that shold be rendered AFTER the login */}
             <Route path="/list/:id" element={<TheList />} />
             <Route path="/list/:id/new" element={<TheList isNew={true} />} />
             <Route path="/list/:id/edit" element={<TheList isNew={false} />} />
