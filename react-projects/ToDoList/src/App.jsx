@@ -8,6 +8,7 @@ import { auth } from "./firebaseConfig"
 import { onAuthStateChanged } from "firebase/auth"
 import LoginScreen from "./components/LoginScreen"
 import SignUpScreen from "./components/SignUpScreen"
+import VerifyEmail from "./components/VerifyEmail"
 
 function App() {
 
@@ -57,6 +58,7 @@ function App() {
             <Route path="/" element={user ? <MainScreen user={user} /> : <Navigate to="/login" replace /> } />
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/signup" element={<SignUpScreen />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             {/* We most likely will have to update the paths now for components that shold be rendered AFTER the login */}
             <Route path="/list/:id" element={<TheList />} />
             <Route path="/list/:id/new" element={<TheList isNew={true} />} />

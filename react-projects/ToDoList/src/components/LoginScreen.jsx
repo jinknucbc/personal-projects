@@ -37,7 +37,8 @@ function LoginScreen() {
             <input onChange={handlePasswordChange} type={showPassword ? 'text' : 'password'} value={password}></input><button onClick={(e) => {setShowPassword(!showPassword)}} type='check'>Show Password</button>
             <button type='submit'>Login</button>
         </form>
-        
+        {error ? `Invalid login credentials` : null }
+        <p>No account? <Link to='/signup' >Sign Up</Link></p>
     </div>
   )
 }
