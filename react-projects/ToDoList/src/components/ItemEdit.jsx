@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
 function ItemEdit({currItem, onSaveEdit, onCancelEdit}) {
-    const [newText, setNewText] = useState(currItem.text)
+    const [newText, setNewText] = useState(currItem.itemText)
 
     const handleChange = (event) => {
       setNewText(event.target.value)
@@ -10,7 +10,7 @@ function ItemEdit({currItem, onSaveEdit, onCancelEdit}) {
     const handleSave = () => {
       const updatedItem = {
         ...currItem,
-        text: newText
+        itemText: newText
       }
       onSaveEdit(updatedItem)
       setNewText("")

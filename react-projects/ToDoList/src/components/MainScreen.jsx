@@ -2,12 +2,14 @@ import React, { useState, useContext, useRef, useEffect } from 'react'
 import ListCard from "../components/ListCard"
 import { useNavigate } from 'react-router-dom'
 import { ContextContainer } from './ListContext'
+import { auth } from '../firebaseConfig'
+import { userCreateList, getUserList, deleteUserList, updateUserList } from '../services/database'
 
 function MainScreen() {
   // This main screen will need access to the array of lists, at least the short version of them.
   // This is where list cards will be displayed.
 
-  const {listArray, setListArray} = useContext(ContextContainer)
+  const {listArray, setListArray, fetchLists} = useContext(ContextContainer)
   // This is likely to be an array of objects containing the ID of the array and the contents.
 
   // const [listPreview, setListPreview] = useState([])
@@ -15,9 +17,34 @@ function MainScreen() {
   // const [inEditMode, setInEditMode] = useState(false)
   const [inRemoveMode, setInRemoveMode] = useState(false)
   const [removeSelected, setRemoveSelected] = useState([])
+  const [loading, setLoading] = useState(true)
   const cardContainer = useRef(null)
 
   const nav = useNavigate()
+
+  useEffect(() => {
+    // Fetch the lists from database
+    // const fetchedLists = getUserList(auth.currentUser.uid)
+    
+    const fetchData = async () => {
+      setLoading(true)
+      const userId = auth.currentUser?.uid
+      if (userId) {
+        try {
+          await fetchLists(auth.currentUser.uid)
+        } catch (error) {
+          throw error
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        setLoading(false)
+        throw new Error("There was an error fetching data.")
+      }
+    }
+    fetchData()
+    console.log(listArray)
+  }, [fetchLists, auth.currentUser?.uid])
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -32,8 +59,8 @@ function MainScreen() {
       document.addEventListener("mouseup", handleOutsideClick)
       return () => {document.removeEventListener("mouseup", handleOutsideClick)}
     }
-    
   }, [cardContainer, removeSelected])
+
 
   const handleCreate = () => {
     const newID = crypto.randomUUID()
@@ -46,12 +73,13 @@ function MainScreen() {
     nav(`/list/${newID}/new`)
   }
 
-  const handleOpen = (listKey) => {
+  const handleOpen = (listId) => {
     // Now, this function needs to know to which list it should navigate the user, and the way to do that is, since we have context
     // and navigation paths defined using key/ID of lists, to have this function receive the list key/ID from "ListCard.jsx". The reason
     // we don't want to use "newID" as shown above is we're opening a list that's already been created, so it's not new. This function will
     // need to be passed to "ListCard" so that it can be called from that component.
-    nav(`/list/${listKey}/edit`)
+    console.log(listId)
+    nav(`/list/${listId}/edit`)
   }
 
   // const handleEdit = () => {
@@ -71,20 +99,20 @@ function MainScreen() {
       })
   }
 
-  const handleListToRemove = (listKey) => {
+  const handleListToRemove = (listPrimaryId) => {
     if (inRemoveMode) {
       // console.log("Are we here?")
       setRemoveSelected((prevLists) => {
-        if (prevLists.includes(listKey)) {
+        if (prevLists.includes(listPrimaryId)) {
           // console.log(`${listKey} has been removed from remove array.`)
-          return prevLists.filter(listId => listId !== listKey)
+          return prevLists.filter(listId => listId !== listPrimaryId)
         } else {
-          return [...prevLists, listKey]
+          return [...prevLists, listPrimaryId]
         }
       })
       // console.log(removeSelected)
     } else {
-      nav(`list/${listKey}/edit`)
+      nav(`list/${listPrimaryId}/edit`)
     }
   }
 
@@ -93,7 +121,7 @@ function MainScreen() {
   // should cause re-rendering automatically, so this component should reflect that change.
 
   const handleRemoveConfirm = () => {
-    setListArray(listArray.filter((listObj) => !removeSelected.includes(listObj.key)))
+    setListArray(listArray.filter((listObj) => !removeSelected.includes(listObj.id ? listObj.id : listObj.clientId)))
   }
 
   return (
@@ -106,7 +134,7 @@ function MainScreen() {
           we can have conditional re-rendering.
         */}
         <div style={{borderColor: "red", border: "solid"}}>
-          {listArray.length > 0 ? listArray.map((list) => <ListCard key={list.key} isInSelectMode={canSelect} onOpen={handleOpen} onListToRemove={handleListToRemove} enableRemove={activateRemoveMode} isInRemoveMode={inRemoveMode} listKey={list.key} listTitle={list.title} contentArray={list.content} />) : null}
+          {listArray.length > 0 ? listArray.map((list) => <ListCard key={list.id ? list.id : list.clientId} isInSelectMode={canSelect} onOpen={handleOpen} onListToRemove={handleListToRemove} enableRemove={activateRemoveMode} isInRemoveMode={inRemoveMode} listId={list.id ? list.id : list.clientId} listTitle={list.title} contentArray={list.content} />) : null}
         </div>
         <button onClick={handleCreate} disabled={canSelect}>Create</button>
         {/* <button onClick={handleEdit} disabled={listArray.length === 0}>Edit</button> */}

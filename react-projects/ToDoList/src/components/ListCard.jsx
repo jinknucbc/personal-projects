@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 
-function ListCard({listKey, listTitle, contentArray, 
+function ListCard({listId, listTitle, contentArray, 
   onOpen, onListToRemove, enableRemove, isInSelectMode, isInRemoveMode}) {
 
     const holdTimer = useRef(null)
@@ -47,7 +47,7 @@ function ListCard({listKey, listTitle, contentArray,
     if (holdTimer.current && holdTimer.current < timeToHold && !isInRemoveMode) {
       // console.log(holdTimer.current)
       clearTimeout(holdTimer.current)
-      onOpen(listKey)
+      onOpen(listId)
     }
     clearTimeout(holdTimer.current)
     holdTimer.current = null
@@ -55,20 +55,22 @@ function ListCard({listKey, listTitle, contentArray,
 
   const onClickList = () => {
     if (isInSelectMode) {
-      onListToRemove(listKey)
+      onListToRemove(listId)
     }
   }
 
   return (
     <>
+    {/* {console.log(listId)} */}
     <div onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onClick={onClickList} style={{border: "dashed"}}>
       {listTitle}
       {/* {console.log(itemText)} */}
       <div>
         {/* {contentArray.map((item) => console.log(item))} */}
         {contentArray.map((listItem, index) => {
+          // console.log(listItem)
           if (index < 3) {
-            return <ul key={index}>{listItem.text}</ul>
+            return <ul key={listItem.itemId}>{listItem.itemText}</ul>
           }
         })}
       </div>

@@ -13,15 +13,15 @@ function ListItem({itemData, onClick, canSelect}) {
    const clickHandler = () => {
     if (canSelect) {
     onClick({
-      key: itemData.key,
-      text: itemData.text
+      itemId: !itemData.itemId ? itemData.itemId : itemData.clientId,
+      itemText: itemData.itemText
     })
   }
    }
 
   return (
     <ul onClick={clickHandler}>
-        {itemData.text}
+        {itemData.itemText}
     </ul>
     // 
   )

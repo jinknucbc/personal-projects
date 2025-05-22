@@ -48,16 +48,17 @@ function TheList({isNew}) {
         if (isNew) {
             // console.log("Can we get here?")
             setCurrentList({
-                key: id,
+                id: id,
                 title: "New List",
                 content: []
             })
             // console.log(currentList)
         } else {
             // console.log(currentList)
-            const fetchList = listArray.find((lists) => lists.key === id)
+            const fetchList = listArray.find((lists) => lists.id === id)
             // console.log(fetchList)
             if (fetchList) {
+                // console.log(fetchList)
                 setCurrentList(fetchList)
                 // if (!listItems)
             }
@@ -79,8 +80,8 @@ function TheList({isNew}) {
    const addHandler = () => {
     if (userText.trim() !== '') {
         const itemToAdd = {
-            key: crypto.randomUUID(),
-            text: userText,
+            itemId: crypto.randomUUID(),
+            itemText: userText,
         }
         // setListItems([...listItems, itemToAdd]);
         setCurrentList((prevList) => ({...prevList, content: [...prevList.content, itemToAdd]}))
@@ -122,7 +123,7 @@ function TheList({isNew}) {
    const onConfirmRemove = () => {
     if (removeSelected) {
         // Probably better to have a temporary variable to store the changed content array and then reassign the content array with that...
-        setCurrentList((prevList) => ({...prevList, content: prevList.content.filter((item) => !removeSelected.includes(item.key))}))
+        setCurrentList((prevList) => ({...prevList, content: prevList.content.filter((item) => !removeSelected.includes(item.itemId))}))
     }
     setRemoveSelected([])
     setInRemoveMode(!inRemoveMode)
@@ -154,12 +155,12 @@ function TheList({isNew}) {
         }
     } else if (inRemoveMode && canSelect) {
         setSelectItem(null)
-        if (!removeSelected.includes(item.key)) {
+        if (!removeSelected.includes(item.itemId)) {
             // If first time selecting, then add to array
-            setRemoveSelected([...removeSelected, item.key])
+            setRemoveSelected([...removeSelected, item.itemId])
         } else {
             // If not first time selecting, then deselect
-            setRemoveSelected(removeSelected.filter((element) => {return element !== item.key}))
+            setRemoveSelected(removeSelected.filter((element) => {return element !== item.itemId}))
         }
     }
     else {
@@ -171,7 +172,7 @@ function TheList({isNew}) {
 
    const onSaveEdit = (editedItem) => {    
     const updatedList = currentList.content.map((itemObj) => {
-        return itemObj.key === editedItem.key ? editedItem : itemObj})
+        return itemObj.itemId === editedItem.itemId ? editedItem : itemObj})
     setCurrentList((prevList) => ({...prevList, content: updatedList}))
     setSelectItem(null)
     setCanSelect(!canSelect)
@@ -190,9 +191,10 @@ function TheList({isNew}) {
     // And that's when we can pass the list object to "MainScreen.jsx" and include it in the overall list array.
     // console.log(onCreateList)
     if (isNew) {
-        onCreateList(currentList)
+        onCreateList(currentList) // currentList has the list ID, title, and content array. This is received as "listArray" in ListContext
     } else {
-        updateList(id, currentList.content)
+        console.log(id)
+        updateList(id, currentList)
         nav("/")
     }
    }
@@ -219,7 +221,8 @@ function TheList({isNew}) {
         {/* The list title should appear here in level 2 or 3 heading */}
         <div>
             <textarea onChange={onChange} value={userText} placeholder='Type something'></textarea>
-            {currentList.content && currentList.content.map((itemData, index) => <ListItem itemData={itemData} key={index} onClick={canSelect ? handleItemClick : null} canSelect={canSelect} />)}
+            {currentList.content && currentList.content.map((itemData, index) => <ListItem itemData={itemData} key={itemData.itemId ? itemData.itemId : itemData.clientId} onClick={canSelect ? handleItemClick : null} canSelect={canSelect} />)}
+            {/* The "key" part here will need to be changed to itemData.itemKey, and "itemData" can now be changed to itemData.text */}
         </div>
         <button onClick={addHandler} disabled={canSelect}>Add</button> 
         <button onClick={editHandler} disabled={currentList.content.length === 0}>Edit</button>
