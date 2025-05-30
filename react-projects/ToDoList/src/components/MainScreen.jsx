@@ -4,13 +4,16 @@ import { useNavigate } from 'react-router-dom'
 import { ContextContainer } from './ListContext'
 import { auth } from '../firebaseConfig'
 import { userCreateList, getUserList, deleteUserList, updateUserList } from '../services/database'
+import { useAuth } from './AuthContext'
 
 function MainScreen() {
   // This main screen will need access to the array of lists, at least the short version of them.
   // This is where list cards will be displayed.
 
-  const {listArray, setListArray, fetchLists} = useContext(ContextContainer)
+  const {listArray, setListArray, fetchLists, refreshCounter, removeList} = useContext(ContextContainer)
   // This is likely to be an array of objects containing the ID of the array and the contents.
+
+  const {user, userLogout} = useAuth()
 
   // const [listPreview, setListPreview] = useState([])
   const [canSelect, setCanSelect] = useState(false)
@@ -43,8 +46,7 @@ function MainScreen() {
       }
     }
     fetchData()
-    console.log(listArray)
-  }, [fetchLists, auth.currentUser?.uid])
+  }, [fetchLists, auth.currentUser?.uid, refreshCounter])
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -78,7 +80,7 @@ function MainScreen() {
     // and navigation paths defined using key/ID of lists, to have this function receive the list key/ID from "ListCard.jsx". The reason
     // we don't want to use "newID" as shown above is we're opening a list that's already been created, so it's not new. This function will
     // need to be passed to "ListCard" so that it can be called from that component.
-    console.log(listId)
+    // console.log(listId)
     nav(`/list/${listId}/edit`)
   }
 
@@ -99,20 +101,20 @@ function MainScreen() {
       })
   }
 
-  const handleListToRemove = (listPrimaryId) => {
+  const handleListToRemove = (listId) => {
     if (inRemoveMode) {
       // console.log("Are we here?")
       setRemoveSelected((prevLists) => {
-        if (prevLists.includes(listPrimaryId)) {
+        if (prevLists.includes(listId)) {
           // console.log(`${listKey} has been removed from remove array.`)
-          return prevLists.filter(listId => listId !== listPrimaryId)
+          return prevLists.filter(listId => listId !== listId)
         } else {
-          return [...prevLists, listPrimaryId]
+          return [...prevLists, listId]
         }
       })
       // console.log(removeSelected)
     } else {
-      nav(`list/${listPrimaryId}/edit`)
+      nav(`list/${listId}/edit`)
     }
   }
 
@@ -121,7 +123,16 @@ function MainScreen() {
   // should cause re-rendering automatically, so this component should reflect that change.
 
   const handleRemoveConfirm = () => {
-    setListArray(listArray.filter((listObj) => !removeSelected.includes(listObj.id ? listObj.id : listObj.clientId)))
+    setListArray(listArray.filter((listObj) => !removeSelected.includes(listObj.id)))
+    removeList(auth.currentUser.uid, removeSelected)
+  }
+
+  const handleLogout = async () => {
+    try {
+      await userLogout()
+    } catch (error) {
+      throw error
+    }
   }
 
   return (
@@ -134,18 +145,28 @@ function MainScreen() {
           we can have conditional re-rendering.
         */}
         <div style={{borderColor: "red", border: "solid"}}>
-          {listArray.length > 0 ? listArray.map((list) => <ListCard key={list.id ? list.id : list.clientId} isInSelectMode={canSelect} onOpen={handleOpen} onListToRemove={handleListToRemove} enableRemove={activateRemoveMode} isInRemoveMode={inRemoveMode} listId={list.id ? list.id : list.clientId} listTitle={list.title} contentArray={list.content} />) : null}
+          {listArray.length > 0 ? listArray.map((list) => <ListCard key={list.id} isInSelectMode={canSelect} onOpen={handleOpen} onListToRemove={handleListToRemove} enableRemove={activateRemoveMode} isInRemoveMode={inRemoveMode} listId={list.id} listTitle={list.title} contentArray={list.content} />) : null}
         </div>
         <button onClick={handleCreate} disabled={canSelect}>Create</button>
         {/* <button onClick={handleEdit} disabled={listArray.length === 0}>Edit</button> */}
         {/* <button disabled={listArray.length === 0}>Remove</button> */}
         <button disabled={removeSelected.length === 0} onClick={handleRemoveConfirm}>Remove</button>
           {/* {console.log(listArray)} */}
-
+          {user ? <button onClick={handleLogout}>Logout</button> : null}
       </div>
     </>
     
   )
 }
+
+// const MainScreen = () => {
+//   console.log("MainScreen component rendered!");
+//   return (
+//     <div>
+//       <h1>Welcome to the Main Screen!</h1>
+//       <p>If you see this, MainScreen is rendering.</p>
+//     </div>
+//   );
+// };
 
 export default MainScreen

@@ -5,6 +5,7 @@ function ListCard({listId, listTitle, contentArray,
 
     const holdTimer = useRef(null)
     const isHolding = useRef(false)
+    const pressTime = useRef(0)
 
     const timeToHold = 1500
 
@@ -31,6 +32,7 @@ function ListCard({listId, listTitle, contentArray,
   // }
 
   const handleMouseDown = () => {
+    pressTime.current = Date.now()
     isHolding.current = true;
     holdTimer.current = setTimeout(() => {
       // console.log("Yeah it's working")
@@ -44,25 +46,32 @@ function ListCard({listId, listTitle, contentArray,
     // console.log("Mouse is officially up")
     // We need to check if the time held is less than the designated time. If it is, then we'll clear the timeout and open that list.
     isHolding.current = false
-    if (holdTimer.current && holdTimer.current < timeToHold && !isInRemoveMode) {
+    if (holdTimer.current) {
       // console.log(holdTimer.current)
       clearTimeout(holdTimer.current)
-      onOpen(listId)
+      holdTimer.current = null
+      const pressDuration = Date.now() - pressTime.current
+      if (pressDuration < timeToHold) {
+        if (isInSelectMode) {
+          onListToRemove(listId)
+        } else {
+          onOpen(listId)
+        }
+      }
     }
-    clearTimeout(holdTimer.current)
-    holdTimer.current = null
+    // clearTimeout(holdTimer.current)
   }
 
-  const onClickList = () => {
-    if (isInSelectMode) {
-      onListToRemove(listId)
-    }
-  }
+  // const onClickList = () => {
+  //   if (isInSelectMode) {
+  //     onListToRemove(listId)
+  //   }
+  // }
 
   return (
     <>
     {/* {console.log(listId)} */}
-    <div onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onClick={onClickList} style={{border: "dashed"}}>
+    <div onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} style={{border: "dashed"}}>
       {listTitle}
       {/* {console.log(itemText)} */}
       <div>

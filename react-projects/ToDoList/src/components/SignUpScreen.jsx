@@ -4,6 +4,8 @@ import { auth } from '../firebaseConfig'
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
 
 function SignUpScreen() {
+  // Same thing here. Instead of importing those create and verification functions here, we'll define the functions that will use those
+  // functions in "AuthContext.jsx" and then call those functions in this component.
   const [userEmail, setUserEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")

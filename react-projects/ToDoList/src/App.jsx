@@ -9,31 +9,73 @@ import { onAuthStateChanged } from "firebase/auth"
 import LoginScreen from "./components/LoginScreen"
 import SignUpScreen from "./components/SignUpScreen"
 import VerifyEmail from "./components/VerifyEmail"
+import { AuthProvider, useAuth } from "./components/AuthContext"
+import ProtectedRoutes from "./components/ProtectedRoutes"
+
+// function PublicRoutes() {
+//   const {user, loading} = useAuth()
+//     console.log("PublicRoute rendered. User:", !!user, "Loading:", loading, "Current URL:", window.location.pathname);
+
+
+//   if (loading) {
+//     return <>
+//       <div>
+//         <p>Loading...</p>
+//       </div>
+//     </>
+//   }
+
+//   if (user) {
+//     return <Navigate to="/main-screen" replace />
+//   }
+
+//   return <Outlet />
+// }
+
+function RedirectIfLoggedIn({children}) {
+  const {user, loading} = useAuth()
+
+  if (loading) {
+    return <div>
+      <p>Authenticating...</p>
+    </div>
+  }
+
+  if (user) {
+    return <Navigate to="/main-screen" replace />
+  }
+
+  return children
+
+}
 
 function App() {
+    console.log("App.jsx rendered. Current URL:", window.location.pathname);
+
 
   const [user, setUser] = useState(null) // Assume that the user is not logged in yet
   const [loading, setLoading] = useState(true) // And following that assumption, we set loading to true
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-      if (authUser) {
-        setUser(authUser)
-      } else {
-        setUser(null)
-      }
-    })
-    setLoading(false)
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+  //     if (authUser) {
+  //       setUser(authUser)
+  //     } else {
+  //       setUser(null)
+  //     }
+  //   })
+  //   setLoading(false)
 
-    return () => unsubscribe()
-  }, [])
+  //   return () => unsubscribe()
+  // }, [])
 
-  if (loading) {
-    return <div>Loading...</div>
-  }
+  // if (loading) {
+  //   return <div>Loading...</div>
+  // }
 
   return (
     <BrowserRouter>
+      <AuthProvider>
       <ContextProvider>
         <Routes>
             {/* <Header /> */}
@@ -55,23 +97,63 @@ function App() {
 
             */
             }
-            <Route path="/" element={user ? <MainScreen user={user} /> : <Navigate to="/login" replace /> } />
-            <Route path="/login" element={<LoginScreen />} />
-            <Route path="/signup" element={<SignUpScreen />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route
+            path="/login"
+            element={<RedirectIfLoggedIn><LoginScreen/></RedirectIfLoggedIn>}>
+              {/* <Route path="/login" element={<LoginScreen />} /> */}
+              {/* <Route path="/signup" element={<SignUpScreen />} />
+              <Route path="/verify-email" element={<VerifyEmail />} /> */}
+            </Route>
+            <Route
+            path="/signup"
+            element={<RedirectIfLoggedIn><SignUpScreen/></RedirectIfLoggedIn>}
+            ></Route>
+            <Route
+            path="/verify-email"
+            element={<RedirectIfLoggedIn><VerifyEmail/></RedirectIfLoggedIn>}
+            ></Route>
+
+            <Route path="/" element={<ProtectedRoutes/>}>
+              <Route path="/main-screen" element={<MainScreen/> }/>
+              <Route path="/list/:id" element={<TheList />} />
+              <Route path="/list/:id/new" element={<TheList isNew={true} />} />
+              <Route path="/list/:id/edit" element={<TheList isNew={false} />} />
+              <Route index element={<Navigate to="/main-screen" replace />} />
+            </Route>
+
+            {/* <Route path="/" element={<HomeRedirect/>} /> */}
+            
             {/* We most likely will have to update the paths now for components that shold be rendered AFTER the login */}
-            <Route path="/list/:id" element={<TheList />} />
-            <Route path="/list/:id/new" element={<TheList isNew={true} />} />
-            <Route path="/list/:id/edit" element={<TheList isNew={false} />} />
+            
             {/* This should render "MainScreen" component. <MainScreen /> */}
 
         </Routes>
       </ContextProvider>
+      </AuthProvider>
     </BrowserRouter>
   )
 }
 
-// For now, I won't be working on the backend part as I just want to get the frontend functional.
 // The final form of this project, however, will have a header bar with Login and Dark Mode and Color Blind friendly mode.
+
+// function HomeRedirect() {
+//   const {user, loading}  = useAuth()
+//     console.log("HomeRedirect rendered. User:", !!user, "Loading:", loading, "Current URL:", window.location.pathname);
+
+
+//   if (loading) {
+//     return <>
+//       <div>
+//         <p>Loading...</p>
+//       </div>
+//     </>
+//   }
+
+//   if (user) {
+//     return <Navigate to='/main-screen' replace />
+//   } else {
+//     return <Navigate to='/login' replace />
+//   }
+// }
 
 export default App

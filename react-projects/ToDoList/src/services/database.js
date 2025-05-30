@@ -93,14 +93,31 @@ const deleteUserList = async (userId, listIds) => {
     if (!userId) {
         throw new Error("Invalid user ID.")
     }
-    const listCollectionRef = collection(db, "users", userId, "lists")
+    // const listCollectionRef = collection(db, "users", userId, "lists")
     const batch = writeBatch(db)
 
+    for (const listId of listIds) {
+        const listDocRef = doc(db, 'users', userId, 'lists', listId)
+        const itemCollectionRef = collection(db, 'users', userId, 'lists', listId, 'items')
+        let querySnapshot
+        try {
+            querySnapshot = await getDocs(itemCollectionRef)
+
+        } catch (error) {
+            continue
+        }
+        console.log(querySnapshot)
+        querySnapshot.docs.forEach(itemDoc => {
+            batch.delete(itemDoc.ref)
+        })
+        batch.delete(listDocRef)
+    }
+
     try {
-        listIds.forEach(listId => {
-            const docRef = doc(listCollectionRef, listId)
-            batch.delete(docRef)
-        });
+        // listIds.forEach(listId => {
+        //     const docRef = doc(listCollectionRef, listId)
+        //     batch.delete(docRef)
+        // });
         await batch.commit()
     } catch (error) {
         throw error        
@@ -159,8 +176,11 @@ const updateUserList = async (userId, listId, updatedList ) => {
                 const matchingId = currentItems.get(item.itemId)
                 // console.log(matchingId)
                 if (matchingId.itemText !== item.itemText) {
+                    // console.log(matchingId.itemText)
+                    // console.log(item.itemText)
                     const docRef = doc(itemCollectionRef, item.itemId)
-                    batch.update(docRef, {itemText: matchingId.itemText})
+                    // console.log(docRef)
+                    batch.update(docRef, {itemText: item.itemText})
                     // console.log(matchingId.itemText)
                     // This is the case where the item with matching ID exists but itemText is different.
                 }
@@ -183,15 +203,39 @@ const updateUserList = async (userId, listId, updatedList ) => {
 
 }
 
-const updateListItems = async (userId, listId, itemId, newItemText) => {
+const removeListItems = async (userId, listId, itemsArray) => {
+    // To delete certain items from a certain list that belongs to a certain user, we'll need the user's ID and that of the list. Because the
+    // user can multi-select items to remove, we'll just pass in an array of item objects/IDs. Again, this function will be called when the user
+    // presses "Confirm" button. I might add like 5-second cooldown before the deletion is actually carried out just in case the user wants
+    // to undo the deletion.
+    // This is likely going to be called inside "deleteUserList". Not all the time, but that's definitely one of the cases.
+    // Actually, I might implement "deleteUserList" case in that function, since its job is to delete everything about that list anyway.
+    // Just to clarify, "itemsArray" here refers to the array of items to be deleted.
     if (!userId) {
-        throw new Error("Invalid user ID.")
+        throw new Error("Invalid User ID")
     }
+
+    const fetchedList = await getListAndItems(userId, listId)
+
+    if (!fetchedList) {
+        throw new Error("The list doesn't exist!")
+    }
+
+    // const listRef = doc(db, 'users', userId, 'lists', listId)
     const itemCollectionRef = collection(db, 'users', userId, 'lists', listId, 'items')
-    // From this collection, we'll need to get the document that has the matching "itemId", change the data which in this case is simple text
-    // using updateDoc.
-    // const docRef = doc(itemCollectionRef, itemId)
-    // updateDoc(itemCollectionRef, {itemText: newItemText} )
+
+    const batch = writeBatch(db)
+
+    try {
+        itemsArray.forEach(itemId => {
+            const itemDocRef = doc(itemCollectionRef, itemId)
+            batch.delete(itemDocRef)
+        })
+        await batch.commit()
+    } catch (error) {
+        throw error
+    }
+
 }
 
-export { userCreateList, getUserList, deleteUserList, updateUserList, getListItems}
+export { userCreateList, getUserList, deleteUserList, updateUserList, getListItems, removeListItems}

@@ -13,7 +13,7 @@ function ListItem({itemData, onClick, canSelect}) {
    const clickHandler = () => {
     if (canSelect) {
     onClick({
-      itemId: !itemData.itemId ? itemData.itemId : itemData.clientId,
+      itemId: itemData.itemId,
       itemText: itemData.itemText
     })
   }

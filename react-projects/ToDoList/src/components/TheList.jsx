@@ -4,6 +4,8 @@ import ItemEdit from './ItemEdit'
 import ItemRemove from './ItemRemove'
 import { useNavigate, useParams } from 'react-router-dom'
 import {ContextContainer} from "./ListContext"
+import { auth } from '../firebaseConfig'
+import { useAuth } from './AuthContext'
 
 function TheList({isNew}) {
 
@@ -18,7 +20,8 @@ function TheList({isNew}) {
     const listContainer = useRef(null)
     const [currentList, setCurrentList] = useState(null)
     const {id} = useParams()
-    const {onCreateList, listArray, updateList} = useContext(ContextContainer)
+    const {onCreateList, listArray, setListArray, updateList, fetchLists, removeItems} = useContext(ContextContainer)
+    const {user} = useAuth()
     const nav = useNavigate();
 
     /*
@@ -54,9 +57,10 @@ function TheList({isNew}) {
             })
             // console.log(currentList)
         } else {
-            // console.log(currentList)
+            console.log(listArray)
             const fetchList = listArray.find((lists) => lists.id === id)
-            // console.log(fetchList)
+            console.log(fetchList)
+            // const fetchedLists = fetchLists(auth.currentUser.uid)
             if (fetchList) {
                 // console.log(fetchList)
                 setCurrentList(fetchList)
@@ -124,6 +128,7 @@ function TheList({isNew}) {
     if (removeSelected) {
         // Probably better to have a temporary variable to store the changed content array and then reassign the content array with that...
         setCurrentList((prevList) => ({...prevList, content: prevList.content.filter((item) => !removeSelected.includes(item.itemId))}))
+        removeItems(user.uid, id, removeSelected)
     }
     setRemoveSelected([])
     setInRemoveMode(!inRemoveMode)
@@ -174,6 +179,20 @@ function TheList({isNew}) {
     const updatedList = currentList.content.map((itemObj) => {
         return itemObj.itemId === editedItem.itemId ? editedItem : itemObj})
     setCurrentList((prevList) => ({...prevList, content: updatedList}))
+    setListArray((oldLists) => 
+        oldLists.map((list) => {
+            if (list.id === id) {
+                list.content.map((listItem) => {
+                    if (listItem.itemId === editedItem.itemId) {
+                        return {...listItem, itemText: editedItem.itemText}
+                    }
+                })
+            }
+            return list
+        })
+    
+        )
+    // console.log(listArray)
     setSelectItem(null)
     setCanSelect(!canSelect)
     setInEditMode(!inEditMode)
@@ -193,10 +212,11 @@ function TheList({isNew}) {
     if (isNew) {
         onCreateList(currentList) // currentList has the list ID, title, and content array. This is received as "listArray" in ListContext
     } else {
-        console.log(id)
+        // console.log(id)
         updateList(id, currentList)
-        nav("/")
+        nav("/main-screen")
     }
+    // We probably should disable remove mode here as well. Put that at the top to make sure the mode is disabled.
    }
 
    const handleChangeTitle = (e) => {
