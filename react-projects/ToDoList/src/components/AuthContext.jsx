@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { auth } from '../firebaseConfig'
-import { onAuthStateChanged } from 'firebase/auth'
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { createUserWithEmailAndPassword, onAuthStateChanged, sendEmailVerification, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 
 export const AuthContext = createContext(null)
 
@@ -13,7 +12,6 @@ export const AuthProvider = ({children}) => {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, user => {
-            console.log("AuthContext: onAuthStateChanged fired. User:", !!user, "Loading now:", false);
             setUser(user)
             setLoading(false)
         })
@@ -50,12 +48,27 @@ export const AuthProvider = ({children}) => {
         
     })
 
+    const signUp = useCallback(async (userEmail, password) => {
+        return await createUserWithEmailAndPassword(auth, userEmail, password)
+    }, [])
+
+    const sendVerification = useCallback(async (user) => {
+        if (user) {
+            await sendEmailVerification(user)
+        } else {
+            throw new Error("Couldn't send a verification email.")
+        }
+        
+    }, [])
+
     const contextValue = {
         user,
         loading,
         error,
         userLogin,
         userLogout,
+        signUp,
+        sendVerification
     }
 
     return (

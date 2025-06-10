@@ -1,14 +1,13 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { auth } from '../firebaseConfig'
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
+import { useAuth } from './AuthContext'
 
 function SignUpScreen() {
-  // Same thing here. Instead of importing those create and verification functions here, we'll define the functions that will use those
-  // functions in "AuthContext.jsx" and then call those functions in this component.
+  const {signUp, sendVerification} = useAuth()
   const [userEmail, setUserEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const nav = useNavigate()
   
@@ -32,10 +31,10 @@ function SignUpScreen() {
       return;
     }
     try {
-      const userInfo = await createUserWithEmailAndPassword(auth, userEmail, password)
-      const user = userInfo.user
+      setLoading(true)
+      const userInfo = await signUp(userEmail, password)
 
-      await sendEmailVerification(auth.currentUser)
+      await sendVerification(userInfo.user)
       nav("/verify-email")
     } catch (error) {
       switch (error.code) {
@@ -54,6 +53,8 @@ function SignUpScreen() {
         default:
           setError("Something went wrong! Let's try it again!")
       }
+    } finally {
+      setLoading(false)
     }
   }
 

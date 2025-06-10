@@ -1,5 +1,5 @@
 import { db } from "../firebaseConfig"
-import { collection, addDoc, doc, getDocs, deleteDoc, writeBatch, updateDoc, getDoc } from "firebase/firestore"
+import { collection, addDoc, doc, getDocs, deleteDoc, writeBatch, updateDoc, getDoc, query } from "firebase/firestore"
 
 const userCreateList = async (userId, listData) => {
     if (!userId) {
@@ -106,7 +106,6 @@ const deleteUserList = async (userId, listIds) => {
         } catch (error) {
             continue
         }
-        console.log(querySnapshot)
         querySnapshot.docs.forEach(itemDoc => {
             batch.delete(itemDoc.ref)
         })
@@ -121,6 +120,49 @@ const deleteUserList = async (userId, listIds) => {
         await batch.commit()
     } catch (error) {
         throw error        
+    }
+}
+
+const deleteAllLists = async (userId) => {
+    if (!userId) {
+        throw new Error("Invalid user ID.")
+    }
+
+    // const batch = writeBatch(db)
+
+    let allListsSnapshot
+
+    try {
+        const listCollectionRef = collection(db, 'users', userId, 'lists')
+        // const itemCollectionRef = collection(db, 'users', userId, 'lists', listId, 'items')
+
+        allListsSnapshot = await getDocs(listCollectionRef) // This becomes the snapshot of all the lists under this particular user
+
+        for (const listDoc of allListsSnapshot.docs) {
+            const listDocId = listDoc.id
+            await deleteUserList(userId, [listDocId])
+        }
+
+    } catch (error) {
+        throw error
+    }
+}
+
+const deleteCollection = async (collectionRef, batchSize = 100) => {
+    const collectionQuery = query(collectionRef)
+    const querySnapshot = await getDocs(collectionQuery)
+
+    if (querySnapshot.size === 0) {
+        return
+    }
+    const deletePromise = []
+    querySnapshot.docs.forEach(doc => {
+        deletePromise.push(deleteDoc(doc.ref))
+    })
+    await Promise.all(deletePromise)
+
+    if (querySnapshot.size === btachSize) {
+        await deleteCollection(collectionRef, batchSize)
     }
 }
 
@@ -238,4 +280,28 @@ const removeListItems = async (userId, listId, itemsArray) => {
 
 }
 
-export { userCreateList, getUserList, deleteUserList, updateUserList, getListItems, removeListItems}
+const removeAllItems = async (userId, listId) => {
+    if (!userId || !listId) {
+        throw new Error("Invalid user or list.")
+    }
+
+    // const listDocRef = doc(db, 'users', userId, 'lists', listId)
+    const itemCollectionRef = collection(db, 'users', userId, 'lists', listId, 'items')
+    let itemsSnapshot
+
+    const batch = writeBatch(db)
+
+    try {
+        itemsSnapshot = await getDocs(itemCollectionRef)
+        itemsSnapshot.docs.forEach((item) => {
+            console.log(item)
+            batch.delete(item.ref)
+        })
+        await batch.commit()
+    } catch (error) {
+        throw error
+    }
+
+}
+
+export { userCreateList, getUserList, deleteUserList, updateUserList, getListItems, removeListItems, deleteAllLists, removeAllItems, deleteCollection}

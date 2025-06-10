@@ -1,16 +1,17 @@
 import React, { useState, useContext, useRef, useEffect } from 'react'
 import ListCard from "../components/ListCard"
 import { useNavigate } from 'react-router-dom'
-import { ContextContainer } from './ListContext'
+import { useListContext } from './ListContext'
 import { auth } from '../firebaseConfig'
-import { userCreateList, getUserList, deleteUserList, updateUserList } from '../services/database'
 import { useAuth } from './AuthContext'
 
 function MainScreen() {
   // This main screen will need access to the array of lists, at least the short version of them.
   // This is where list cards will be displayed.
 
-  const {listArray, setListArray, fetchLists, refreshCounter, removeList} = useContext(ContextContainer)
+  // const {listArray, setListArray, fetchLists, refreshCounter, removeList, removeAllLists} = useContext(ContextContainer)
+  const {listArray, setListArray, fetchLists, refreshCounter, removeList, removeAllLists} = useListContext()
+
   // This is likely to be an array of objects containing the ID of the array and the contents.
 
   const {user, userLogout} = useAuth()
@@ -127,6 +128,10 @@ function MainScreen() {
     removeList(auth.currentUser.uid, removeSelected)
   }
 
+  const handleDeleteAllLists = () => {
+    removeAllLists(user.uid)
+  }
+
   const handleLogout = async () => {
     try {
       await userLogout()
@@ -151,6 +156,7 @@ function MainScreen() {
         {/* <button onClick={handleEdit} disabled={listArray.length === 0}>Edit</button> */}
         {/* <button disabled={listArray.length === 0}>Remove</button> */}
         <button disabled={removeSelected.length === 0} onClick={handleRemoveConfirm}>Remove</button>
+        <button disabled={listArray.length === 0} onClick={handleDeleteAllLists}>Remove all lists</button>
           {/* {console.log(listArray)} */}
           {user ? <button onClick={handleLogout}>Logout</button> : null}
       </div>
