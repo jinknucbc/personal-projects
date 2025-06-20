@@ -1,9 +1,9 @@
-import"./App.css"
+import "./App.css"
+import "./styles.css"
 import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import MainScreen from './components/MainScreen'
 import TheList from './components/TheList'
-import {ContextProvider} from "./components/ListContext"
 import LoginScreen from "./components/LoginScreen"
 import SignUpScreen from "./components/SignUpScreen"
 import VerifyEmail from "./components/VerifyEmail"

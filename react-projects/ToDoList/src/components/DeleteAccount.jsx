@@ -90,14 +90,15 @@ function DeleteAccount() {
 
   return (
     <>
-      <div>
-        {error && <p>{error}</p>}
+      <div className="delete-confirmation">
+        <h3>Delete my account</h3>
+        {error && <p className="error-message">{error}</p>}
         {message && <p>{message}</p>}
         {!userCommit ? (
           <button onClick={handleUserCommit} disabled={isDeleting}>{isDeleting ? "Deleting..." : "Delete Account"}</button>
         ) : (
           <div>
-            <p>This action cannot be undone. All your saved data will be lost!</p>
+            <p className='warning'>This action cannot be undone. All your saved data will be lost!</p>
             <div>
               <label htmlFor='deleteAccount'>Your Current Password:</label>
               <input

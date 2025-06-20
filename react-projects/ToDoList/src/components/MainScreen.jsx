@@ -46,8 +46,12 @@ function MainScreen() {
         throw new Error("There was an error fetching data.")
       }
     }
-    fetchData()
-  }, [fetchLists, auth.currentUser?.uid, refreshCounter])
+    if (user) {
+      fetchData()
+    } else {
+      setLoading(false)
+    }
+  }, [fetchLists, user, refreshCounter])
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -99,7 +103,10 @@ function MainScreen() {
       } else {
         return !prevState
       }
-      })
+    })
+    if (inRemoveMode) {
+      setRemoveSelected([])
+    }
   }
 
   const handleListToRemove = (listId) => {
@@ -108,7 +115,7 @@ function MainScreen() {
       setRemoveSelected((prevLists) => {
         if (prevLists.includes(listId)) {
           // console.log(`${listKey} has been removed from remove array.`)
-          return prevLists.filter(listId => listId !== listId)
+          return prevLists.filter(idFromPrev => idFromPrev !== listId)
         } else {
           return [...prevLists, listId]
         }
@@ -123,7 +130,7 @@ function MainScreen() {
   // What we now need is a "Confirm" button for list card removal which should run the filter method on "listArray". That change in context
   // should cause re-rendering automatically, so this component should reflect that change.
 
-  const handleRemoveConfirm = () => {
+  const handleRemoveConfirm = async () => {
     setListArray(listArray.filter((listObj) => !removeSelected.includes(listObj.id)))
     removeList(auth.currentUser.uid, removeSelected)
   }
@@ -140,25 +147,99 @@ function MainScreen() {
     }
   }
 
+  // if (loading) {
+  //   return (
+  //     <div className='loading'>
+  //       <div className='spinner'></div>
+  //       <p>Loading your lists...</p>
+  //     </div>
+  //   )
+  // }
+
   return (
     <>
-      <div ref={cardContainer} style={{border: "dotted", borderColor: "blue"}}>
+      <div className='main-screen' ref={cardContainer}>
         {/* 
           Some kind of loop over the list array and call "ListCard" in it. This list array, then, will have to contain
           either the short version of each list or the actual list object. This array would have to be updated each time
           a new list is created or an existing one is either edited or deleted. We'll be needing a "useEffect" hook so that
           we can have conditional re-rendering.
         */}
-        <div style={{borderColor: "red", border: "solid"}}>
-          {listArray.length > 0 ? listArray.map((list) => <ListCard key={list.id} isInSelectMode={canSelect} onOpen={handleOpen} onListToRemove={handleListToRemove} enableRemove={activateRemoveMode} isInRemoveMode={inRemoveMode} listId={list.id} listTitle={list.title} contentArray={list.content} />) : null}
+        <div className="container">
+
+          <div className='screen-header'>
+            <h1>Your Lists</h1>
+          </div>
+
+          <div className="lists-grid">
+            {listArray.length > 0 ? (
+              listArray.map((list) => (
+              <ListCard 
+                key={list.id} 
+                isInSelectMode={canSelect} 
+                onOpen={handleOpen} 
+                onListToRemove={handleListToRemove} 
+                enableRemove={activateRemoveMode} 
+                isInRemoveMode={inRemoveMode} 
+                listId={list.id} 
+                listTitle={list.title} 
+                contentArray={list.content}
+                isSelected={removeSelected.includes(list.id)} 
+                />
+                ))
+                ) : (
+                  <p className='text-center'>No lists yet! Let's create some!</p>
+                )}
+          </div>
+
+          <div className='action-buttons mt-3'>
+            <button 
+              className='btn-primary' 
+              onClick={handleCreate} 
+              disabled={canSelect}
+            >
+              Create
+            </button>
+
+            <button
+              className='btn-primary'
+              disabled={!inRemoveMode} 
+              onClick={activateRemoveMode}
+            >
+              {inRemoveMode ? "Exit Remove Mode" : "Select Lists to Remove"}
+            </button>
+            {/* <button className='btn-primary' disabled={removeSelected.length === 0} onClick={handleRemoveConfirm}>Remove</button> */}
+            {inRemoveMode && removeSelected.length > 0 && (
+              <button 
+                className='btn-danger'
+                onClick={handleRemoveConfirm}
+              >
+                Remove Selected: {removeSelected.length}
+              </button>
+            )}
+
+            <button 
+              className='btn-danger'
+              disabled={listArray.length === 0} 
+              onClick={handleDeleteAllLists}
+            >
+              Remove all lists
+            </button>
+
+            {user ? (
+              <button onClick={handleLogout} className='btn-secondary'>
+                Logout
+              </button>
+              ) : null}
+
+          </div>
         </div>
-        <button onClick={handleCreate} disabled={canSelect}>Create</button>
+        
+        
         {/* <button onClick={handleEdit} disabled={listArray.length === 0}>Edit</button> */}
         {/* <button disabled={listArray.length === 0}>Remove</button> */}
-        <button disabled={removeSelected.length === 0} onClick={handleRemoveConfirm}>Remove</button>
-        <button disabled={listArray.length === 0} onClick={handleDeleteAllLists}>Remove all lists</button>
           {/* {console.log(listArray)} */}
-          {user ? <button onClick={handleLogout}>Logout</button> : null}
+          
       </div>
     </>
     

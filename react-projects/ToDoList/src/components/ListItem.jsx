@@ -1,6 +1,14 @@
 import React from 'react'
 
-function ListItem({itemData, onClick, canSelect}) {
+function ListItem({
+  itemData, 
+  onClick, 
+  canSelect,
+  isInEditMode,
+  isInRemoveMode,
+  isSelected,
+  isRemovalSelected
+}) {
   // console.log(itemData)
 
     /* 
@@ -16,13 +24,30 @@ function ListItem({itemData, onClick, canSelect}) {
       itemId: itemData.itemId,
       itemText: itemData.itemText
     })
+    }
   }
-   }
+
+  const styleClasses = [
+    'list-item',
+    isSelected ? "selected" : "",
+    isRemovalSelected ? "selected-for-removal" : "" 
+  ].filter(Boolean).join(' ')
 
   return (
-    <ul onClick={clickHandler}>
-        {itemData.itemText}
-    </ul>
+    <div 
+      className={styleClasses}
+      style={canSelect ? {cursor: "pointer"} : {}}
+    >
+      <div>
+        <ul onClick={clickHandler}>
+          {itemData.itemText}
+        </ul>
+      </div>
+      {isInRemoveMode  && canSelect && (
+        <span className='remove-icon'>X</span>
+      )}
+    </div>
+    
     // 
   )
 }

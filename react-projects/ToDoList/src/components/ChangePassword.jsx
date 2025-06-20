@@ -7,8 +7,9 @@ function ChangePassword() {
     const [currentPassword, setCurrentPassword] = useState("")
     const [newPassword, setNewPassword] = useState("")
     const [confirmNewPassword, setConfirmNewPassword] = useState("")
-    const [error, setError] = useState("")
-    const [successMessage, setSuccessMessage] = useState("")
+    const [error, setError] = useState(null)
+    const [successMessage, setSuccessMessage] = useState(null)
+    const [loading, setLoading] = useState(false)
     const { user } = useAuth()    
 
     const handleCurrentPassword = (e) => {
@@ -25,14 +26,19 @@ function ChangePassword() {
 
     const handlePasswordChange = async (event) => {
         event.preventDefault()
+        setError(null)
+        setSuccessMessage(null)
+        setLoading(true)
 
         if (!user) {
-            setError("Invalid user.")
+            setError("Invalid user. You must be logged in to change password!")
+            setLoading(false)
             return
         }
 
         if (newPassword !== confirmNewPassword) {
             setError("Passwords must match!")
+            setLoading(false)
             return
         }
 
@@ -45,6 +51,7 @@ function ChangePassword() {
             setCurrentPassword("")
             setNewPassword("")
             setConfirmNewPassword("")
+            setSuccessMessage("Password changed successfully!")
         } catch (error) {
             console.log(error)
             if (error.code === "auth/invalid-credential") {
@@ -52,17 +59,61 @@ function ChangePassword() {
             } else {
                 setError(error.message)
             }
+        } finally {
+            setLoading(false)
         }
     }
   return (
     
-    <div>
-        {error && <p>{error}</p>}
-        <form onSubmit={handlePasswordChange}>
-            <input type="password" onChange={handleCurrentPassword} value={currentPassword} placeholder='Your current password...' required />
-            <input type="password" onChange={handleNewPassword} value={newPassword} placeholder='Your new password...' required />
-            <input type="password" onChange={handleConfirmNewPassword} value={confirmNewPassword} placeholder='Confirm new password' required />
-            <button type="submit" >Change Password</button>
+    <div className='form-container'>
+        <h2 className='text-center mb-4'>
+            Change Password
+        </h2>
+        {error && <p className='error-message text-center mb-3'>{error}</p>}
+        {successMessage && <p className='success-message text-center mb-3'>{successMessage}</p>}
+        <form className='auth-form' onSubmit={handlePasswordChange}>
+            <div className='form-group'>
+                <input 
+                    type="password" 
+                    onChange={handleCurrentPassword} 
+                    value={currentPassword} 
+                    placeholder='Your current password...'
+                    className='form-control'
+                    required 
+                />
+            </div>
+            <div className='form-group'>
+                <input 
+                    type="password" 
+                    onChange={handleNewPassword} 
+                    value={newPassword} 
+                    placeholder='Your new password...' 
+                    className='form-control'
+                    required 
+                />
+            </div>
+            <div className='form-group'>
+                <input 
+                    type="password" 
+                    onChange={handleConfirmNewPassword} 
+                    value={confirmNewPassword} 
+                    placeholder='Confirm new password' 
+                    className='form-control'
+                    required 
+                />
+            </div>
+            <button 
+                type="submit"
+                className='btn btn-primary w-100'
+                disabled={loading}
+            >
+                {loading ? (
+                    <>
+                        <span className='spinner' role='status' aria-hidden="true"></span>
+                        Changing...
+                    </>
+                ) : ("Change Password")}
+            </button>
         </form>
     </div>
     

@@ -19,9 +19,9 @@ function ManageAccount() {
     }
 
   return (
-    <div>
+    <div className='account-management'>
         <button onClick={ToChangePassword} >Change Password</button>
-        <button><Link to='/delete-account' >Delete Account</Link></button>
+        <button><Link to='/delete-account' className='link-primary' >Delete Account</Link></button>
     </div>
   )
 }

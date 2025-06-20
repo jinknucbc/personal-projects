@@ -16,6 +16,7 @@ function TheList({isNew}) {
     const [canSelect, setCanSelect] = useState(false)
     const [inRemoveMode, setInRemoveMode] = useState(false)
     const [removeSelected, setRemoveSelected] = useState([])
+    const [showRemovalModal, setShowRemovalModal] = useState(false)
     const listContainer = useRef(null)
     const [currentList, setCurrentList] = useState(null)
     const {id} = useParams()
@@ -32,6 +33,7 @@ function TheList({isNew}) {
                 setInRemoveMode(false)
                 setSelectItem(null)
                 setRemoveSelected([])
+                setShowRemovalModal(false)
             }
         }
         document.addEventListener("mousedown", handleOutSideClick)
@@ -50,9 +52,11 @@ function TheList({isNew}) {
             const fetchList = listArray.find((lists) => lists.id === id)
             if (fetchList) {
                 setCurrentList(fetchList)
+            } else {
+                nav("/main-screen")
             }
         }
-    }, [id, isNew])
+    }, [id, isNew, listArray, nav])
 
     const onChange = (event) => {
         setUserText(event.target.value)
@@ -78,12 +82,12 @@ function TheList({isNew}) {
    }
 
    const removeHandler = () => {
-
-    if (!inRemoveMode) {
-        setInRemoveMode(!inRemoveMode)
-    }
-    if (!canSelect) {
-        setCanSelect(!canSelect)
+    setInRemoveMode((prevState) => !prevState)
+    setCanSelect((prevState) => !prevState)
+    if (inRemoveMode) {
+        setRemoveSelected([])
+        setSelectItem(null)
+        setInEditMode(false)
     }
 
    }
@@ -92,12 +96,10 @@ function TheList({isNew}) {
 
     if (!user || !user.uid) {
         throw new Error("Invalid user!")
-        return
     }
 
     if (!removeSelected || removeSelected.length === 0) {
         throw new Error("There's no item to delete.")
-        return
     }
 
     try {
@@ -118,6 +120,7 @@ function TheList({isNew}) {
         setRemoveSelected([])
         setInRemoveMode(false)
         setCanSelect(false)
+        setShowRemovalModal(false)
     }
    }
 
@@ -126,6 +129,7 @@ function TheList({isNew}) {
     setInRemoveMode(false)
     setCanSelect(false)
     setSelectItem(null)
+    setShowRemovalModal(false)
    }
 
    const handleItemClick = (item) => {
@@ -176,6 +180,7 @@ function TheList({isNew}) {
         setSelectItem(null)
         setCanSelect(false)
         setInEditMode(false)
+        setShowRemovalModal(false)
     }    
    }
 
@@ -212,29 +217,132 @@ function TheList({isNew}) {
     )
    }
 
+   const handleShowRemovalModal = () => {
+    if (removeSelected.length > 0) {
+        setShowRemovalModal(true)
+    } else {
+        alert("Select items to remove first!")
+    }
+   }
+
    if (!currentList) {
-    return <div>Creating a list...</div>
+    return (
+        <div className='loading'>
+            <div className='spinner'></div>
+            <p>Creating a list...</p>
+        </div>
+    )
    }
 
   return (
     <>
-    <div ref={listContainer} style={{border: "solid"}} >
-        <div>
-            <h2>{currentList.title}</h2>
-            <input type="text" placeholder='Title' value={currentList.title} onChange={handleChangeTitle} />
-        </div>
-        <div>
-            <textarea onChange={onChange} value={userText} placeholder='Type something'></textarea>
-            {currentList.content && currentList.content.map((itemData, index) => <ListItem itemData={itemData} key={itemData.itemId ? itemData.itemId : itemData.clientId} onClick={canSelect ? handleItemClick : null} canSelect={canSelect} />)}
-        </div>
-        <button onClick={addHandler} disabled={canSelect}>Add</button> 
-        <button onClick={editHandler} disabled={currentList.content.length === 0}>Edit</button>
-        <button onClick={removeHandler} disabled={currentList.content.length === 0}>Remove</button>
-        <button onClick={removeAllHandler} disabled={currentList.content.length === 0}>Remove All</button>
-        <button onClick={handleFinish}>Finish</button>
+    <div className='list-detail' ref={listContainer} >
+        <div className='container'>
+            <div className="list-header">
+                {inEditMode && selectItem ? (
+                    <h2 className='list-title'>{currentList.title}</h2>
+                ) : (
+                    <input 
+                        type="text" 
+                        className='form-control list-title-input' 
+                        placeholder='Title' 
+                        value={currentList.title} 
+                        onChange={handleChangeTitle} 
+                    />
+                )}
+                
+            </div>
+            <div className='form-group mb-3'>
+                <textarea 
+                    className='item-input form-control' 
+                    onChange={onChange} 
+                    value={userText} 
+                    placeholder='Type something'
+                    disabled={inEditMode || inRemoveMode}
+                    rows="3"
+                ></textarea>
+            </div>
+            <div className='list-items'>
+                {currentList.content && currentList.content.length > 0 ? (
+                    currentList.content.map((itemData) => (
+                    <ListItem 
+                        itemData={itemData} 
+                        key={itemData.itemId} 
+                        onClick={() => handleItemClick(itemData)} 
+                        canSelect={canSelect}
+                        isInEditMode={inEditMode}
+                        isInRemoveMode={inRemoveMode}
+                        isSelected={selectItem && selectItem.itemId === itemData.itemId}
+                        isRemovalSelected={removeSelected.includes(itemData.itemId)}
+                    />
+                    ))
+                ) : (
+                    <p className='info-message text-center'>The list is empty, so let's add some items!</p>
+                )}
+            </div>
+            <div className='action-buttons mt-4'>
+                <button 
+                    className="btn-primary" 
+                    onClick={addHandler} 
+                    disabled={canSelect || userText.trim() === ''}
+                >
+                    Add Item
+                </button> 
+                <button 
+                    className="btn-primary" 
+                    onClick={editHandler} 
+                    disabled={currentList.content.length === 0 || inRemoveMode}
+                >
+                    {inEditMode ? "Cancel Edit" : "Edit Item"}
+                </button>
+                <button 
+                    className="btn-danger" 
+                    onClick={removeHandler} 
+                    disabled={currentList.content.length === 0 || inEditMode}
+                >
+                    {inRemoveMode ? "Cancel Remove" : "Remove Item"}
+                </button>
+                {inRemoveMode && removeSelected.length > 0 && (
+                    <button
+                        className='btn-danger'
+                        onClick={handleShowRemovalModal}
+                        disabled={removeSelected.length === 0}
+                    >
+                        Confirm Remove {removeSelected.length}
+                    </button>
+                )}
+                <button 
+                    className="btn-danger" 
+                    onClick={removeAllHandler} 
+                    disabled={currentList.content.length === 0 || inEditMode}
+                >
+                    Remove All
+                </button>
+                <button 
+                    className="btn-primary" 
+                    onClick={handleFinish}
+                    disabled={inEditMode || inRemoveMode}
+                >
+                    Finish
+                </button>
+            </div>
+            
 
-        {inEditMode && selectItem ? <ItemEdit currItem={selectItem} onSaveEdit={onSaveEdit} onCancelEdit={onCancelEdit} /> : null}
-        {inRemoveMode ? <ItemRemove onConfirmRemove={onConfirmRemove} onCancelRemove={onCancelRemove} selectedItems={removeSelected} /> : null}
+            {inEditMode && selectItem ? (
+                <ItemEdit 
+                    currItem={selectItem} 
+                    onSaveEdit={onSaveEdit} 
+                    onCancelEdit={onCancelEdit} 
+                />
+            ) : null}
+            {showRemovalModal && (
+                <ItemRemove 
+                    onConfirmRemove={onConfirmRemove} 
+                    onCancelRemove={onCancelRemove} 
+                    selectedItems={removeSelected} 
+                />
+             )}
+        </div>
     </div>
     </>
   )

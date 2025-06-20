@@ -161,7 +161,7 @@ const deleteCollection = async (collectionRef, batchSize = 100) => {
     })
     await Promise.all(deletePromise)
 
-    if (querySnapshot.size === btachSize) {
+    if (querySnapshot.size === batchSize) {
         await deleteCollection(collectionRef, batchSize)
     }
 }

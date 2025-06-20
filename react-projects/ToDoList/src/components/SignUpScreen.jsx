@@ -59,15 +59,58 @@ function SignUpScreen() {
   }
 
   return (
-    <div>
-      {error && <p>{error}</p>}
-      <form onSubmit={handleFormSubmit}>
-        <input onChange={handleEmailChange} type='email' placeholder='Your email...' value={userEmail} required />
-        <input onChange={handlePasswordChange} type="password" value={password} required />
-        <input onChange={handleConfirmPasswordChange} type="password" value={confirmPassword} required />
-        <button type="submit">Sign Up</button>
-      </form>
-      <p>Already have an account? Go back to <Link to='/login'>Login</Link> page!</p>
+    <div className='form-container'>
+      
+        <h2 className='text-center mb-4'>Sign Up</h2>
+        {error && <p className='error-message text-center mb-3'>{error}</p>}
+        <form className='auth-form' onSubmit={handleFormSubmit}>
+          <div className='form-group'>
+            <label htmlFor='userEmail' className='form-label visually-hidden'>Email Address</label>
+            <input 
+              id='userEmail'
+              className='form-control'
+              onChange={handleEmailChange} 
+              type='email' 
+              placeholder='Your email...' 
+              value={userEmail} 
+              disabled={loading}
+              required 
+            />
+          </div>
+          <div className='form-group'>
+            <label htmlFor='userPassword' className='form-label visually-hidden'>Password</label>
+            <input 
+              id='userPassword'
+              className='form-control'
+              onChange={handlePasswordChange} 
+              type="password" 
+              value={password}
+              disabled={loading} 
+              required />
+          </div>
+          <div className='form-group'>
+            <label htmlFor='confirmPassword' className='form-label visually-hidden'>Confirm Password</label>
+            <input 
+              id='confirmPassword'
+              className='form-control'
+              onChange={handleConfirmPasswordChange} 
+              type="password" 
+              value={confirmPassword} 
+              disabled={loading}
+              required 
+            />
+          </div>
+            
+          <button type="submit" className='btn btn-primary w-100' disabled={loading}>
+            {loading ? (
+              <>
+                <span className='spinner' role='status' aria-hidden="true"></span>
+                Signing up...
+              </>
+            ) : "Sign Up"}
+          </button>
+        </form>
+        <p className='text-center mt-3'>Already have an account? Go back to <Link to='/login' className='link-primary' >Login</Link> page!</p>
     </div>
   )
 }

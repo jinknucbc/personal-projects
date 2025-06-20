@@ -3,7 +3,7 @@ import { useAuth } from './AuthContext'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 
 const ProfileImage = ({onClick}) => (
-  <div onClick={onClick}>
+  <div className="profile-icon" onClick={onClick}>
     👤
   </div>
 )
@@ -39,20 +39,20 @@ function Header() {
   }
 
   return (
-    <header>
+    <header className='header'>
       <div>
-        <Link to={"/main-screen"} >To Do List</Link>
+        <Link to={"/main-screen"} className='link-primary' >To Do List</Link>
       </div>
-      <nav>
+      <nav className="nav">
         { user ? (
           <>
           {!isInMainScreen && (
-            <Link to={"/main-screen"}>Back to Lists</Link>
+            <Link to={"/main-screen"} className='link-primary' >Back to Lists</Link>
           )}
-          <div ref={menuRef}>
+          <div className='profile-container' ref={menuRef}>
             <ProfileImage onClick={handleProfileClick} />
             { showDropdown && (
-              <div>
+              <div className="dropdown-menu">
                 <p>Email: {user.email}</p>
                 <button onClick={toManageAccount} >Manage Account</button>
                 <button onClick={handleLogout} >Logout</button>
@@ -62,7 +62,7 @@ function Header() {
           </>
         ) : (
           <div>
-            <Link to={"/login"} />
+            <Link to={"/login"} className='link-primary' >Login</Link>
           </div>
         )}
       </nav>

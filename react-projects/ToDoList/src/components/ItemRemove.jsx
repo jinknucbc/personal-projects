@@ -10,9 +10,31 @@ function ItemRemove({onConfirmRemove, onCancelRemove, selectedItems}) {
     }
 
   return (
-    <div>
-        <button onClick={handleConfirm} disabled={selectedItems.length === 0} >Confirm</button>
-        <button onClick={handleCancel} >Cancel</button>
+    <div className='modal-overlay'>
+      <div className='modal-content'>
+        <div className="modal-header">
+          <h3 className='modal-title'>Remove Items</h3>
+          <button className='modal-close-btn' onClick={handleCancel}>&times;</button>
+        </div>
+        <div className='modal-body'>
+          <p>Are you sure you want to remove {selectedItems.length} items?</p>
+        </div>
+        <div className='modal-footer'>
+          <button 
+            className='btn-danger' 
+            onClick={handleConfirm} 
+            disabled={selectedItems.length === 0} 
+          >
+            Confirm {selectedItems.length}
+          </button>
+          <button 
+            className='btn-secondary' 
+            onClick={handleCancel} 
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
