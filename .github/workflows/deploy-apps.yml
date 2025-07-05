@@ -38,7 +38,7 @@ jobs:
       - name: Prepare WeatherApp for deployment
         run: |
           mkdir -p _site/WeatherApp
-          cp -r react-projects/WeatherApp/dist/*_site/WeatherApp/
+          cp -r react-projects/WeatherApp/dist/* _site/WeatherApp/
 
       - name: Build dependencies for ToDoList
         run: npm install
@@ -51,7 +51,7 @@ jobs:
       - name: Prepare ToDoList for deployment
         run: |
           mkdir -p _site/ToDoList
-          cp -r react-projects/ToDoList/dist/*_site/ToDoList/
+          cp -r react-projects/ToDoList/dist/* _site/ToDoList/
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
