@@ -204,17 +204,41 @@ function TheList({isNew}) {
     setCurrentList({...currentList, title: e.target.value })
    }
 
-   const removeAllHandler = () => {
-    removeAllListItems(user.uid, id)
-    setCurrentList((prevList) => ({...prevList, content: []}))
-    setListArray((prevList) => 
-        prevList.map((list) => {
-            if (list.id === id) {
-                return {...list, content: []}
-            }
-            return list
-        })
-    )
+   const removeAllHandler = async () => {
+
+    if (currentList.length === 0) {
+        alert("The list is already empty!")
+        return
+    }
+    const confirmClear = window.confirm("Are you sure you want to delete everything?")
+    if (confirmClear) {
+        try {
+            await removeAllListItems(user.uid, id)
+            removeAllListItems(user.uid, id)
+            setCurrentList((prevList) => ({...prevList, content: []}))
+            setListArray((prevList) => 
+                prevList.map((list) => {
+                    if (list.id === id) {
+                        return {...list, content: []}
+                    }
+                    return list
+                })
+            )
+        } catch (error) {
+            console.log(error)
+            alert("Couldn't clear the list. Please try again!")
+        } finally {
+            setCanSelect(false)
+            setInEditMode(false)
+            setInRemoveMode(false)
+            setSelectItem(null)
+            setRemoveSelected([])
+            setShowRemovalModal(false)
+        }
+    }
+    
+
+    
    }
 
    const handleShowRemovalModal = () => {

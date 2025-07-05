@@ -51,7 +51,7 @@ function LoginScreen() {
         setPassword(e.target.value)
     }
 
-    console.log(error)
+    // console.log(error)
 
   return (
     <div className='form-container'>
