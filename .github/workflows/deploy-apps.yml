@@ -29,29 +29,29 @@ jobs:
 
       - name: Build dependencies for WeatherApp
         run: npm install
-        working-directory: ./personal-projects/react-projects/WeatherApp
+        working-directory: ./react-projects/WeatherApp
 
       - name: Build WeatherApp
         run: npm run build
-        working-directory: ./personal-projects/react-projects/WeatherApp
+        working-directory: ./react-projects/WeatherApp
 
       - name: Prepare WeatherApp for deployment
         run: |
           mkdir -p _site/WeatherApp
-          cp -r personal-projects/react-projects/WeatherApp/dist/*_site/WeatherApp/
+          cp -r react-projects/WeatherApp/dist/*_site/WeatherApp/
 
       - name: Build dependencies for ToDoList
         run: npm install
-        working-directory: ./personal-projects/react-projects/ToDoList
+        working-directory: ./react-projects/ToDoList
 
       - name: Build ToDoList
         run: npm run build
-        working-directory: ./personal-projects/react-projects/ToDoList
+        working-directory: ./react-projects/ToDoList
 
       - name: Prepare ToDoList for deployment
         run: |
           mkdir -p _site/ToDoList
-          cp -r personal-projects/react-projects/ToDoList/dist/*_site/ToDoList/
+          cp -r react-projects/ToDoList/dist/*_site/ToDoList/
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
