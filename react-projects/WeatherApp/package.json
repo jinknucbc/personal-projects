@@ -1,6 +1,5 @@
 {
   "name": "weatherapp",
-  "homepage": "https://jinknucbc.github.io/personal-projects/personal-projects",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,8 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "deploy": "gh-pages -d dist"
+    "preview": "vite preview"
   },
   "dependencies": {
     "axios": "^1.8.3",

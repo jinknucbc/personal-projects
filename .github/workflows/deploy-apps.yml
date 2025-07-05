@@ -27,6 +27,12 @@ jobs:
         with: 
           node-version: '20'
 
+      - name: Create .env for WeatherApp
+        run: |
+          echo: "VITE_WEATHER_API=${{secrets.WEATHER_API}} " > ./.env
+          echo: "VITE_GEO_API=${{secrets.GEO_API}} " > ./.env
+        working-directory: ./react-projects/WeatherApp
+
       - name: Build dependencies for WeatherApp
         run: npm install
         working-directory: ./react-projects/WeatherApp
@@ -39,6 +45,18 @@ jobs:
         run: |
           mkdir -p _site/WeatherApp
           cp -r react-projects/WeatherApp/dist/* _site/WeatherApp/
+
+      - name: Create .env for ToDoList
+        run: |
+            echo: "VITE_FIREBASE_API=${{secrets.FIREBASE_API}}" > ./.env
+            echo: "VITE_PROJECTID=${{secrets.PROJECTID}}" > ./.env
+            echo: "VITE_PROJECTNUM=${{secrets.PROJECTNUM}}" > ./.env
+            echo: "VITE_AUTHDOMAIN=${{secrets.AUTHDOMAIN}}" > ./.env
+            echo: "VITE_STORAGEBUCKET=${{secrets.STORAGEBUCKET}}" > ./.env
+            echo: "VITE_APPID=${{secrets.APPID}}" > ./.env
+            echo: "VITE_MEASUREMENTID=${{secrets.MEASUREMENTID}}" > ./.env
+            echo: "VITE_MESSAGINGSENDERID=${{secrets.MESSAGINGSENDERID}}" > ./.env
+        working-directory: ./react-projects/ToDoList
 
       - name: Build dependencies for ToDoList
         run: npm install
