@@ -34,7 +34,7 @@ function RedirectIfLoggedIn({children}) {
 function App() {
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/personal-projects/ToDoList/">
       <AuthProvider>
       {/* <ContextProvider> */}
         <Routes>
