@@ -198,54 +198,35 @@ const updateUserList = async (userId, listId, updatedList ) => {
         // console.log(currentItems)
         // console.log(updatedItems)
 
-        // for (const item of fetchedList.content) {
-        // // This will need some work, so that it'll delete items in the current list that do not exist in the updated list.
-        // // Honestly, this might be working as intended right now, just that update itself is a little funky at the moment.
-        //     if (!updatedItems.has(item.itemId)) {
-        //         const docRef = doc(itemCollectionRef, item.itemId)
-        //         batch.delete(docRef)
-        //     }
-        // }
-
-        for (const item of updatedList.content) {
-            // console.log(item)
-            // console.log(item[0])
-            // console.log(item[1].itemText)
-            // It would make sense to check if the ID of an added item exists among the current list's items. If not, then we write it into
-            // batch. Another case is where the ID matches but we check if the data, in this particular case itemText, is different in which case
-            // we'd also write the update to batch.
-            if (currentItems.has(item.itemId)) {
-                const matchingId = currentItems.get(item.itemId)
-                // console.log(matchingId)
-                if (matchingId.itemText !== item.itemText) {
-                    // console.log(matchingId.itemText)
-                    // console.log(item.itemText)
-                    const docRef = doc(itemCollectionRef, item.itemId)
-                    // console.log(docRef)
-                    batch.update(docRef, {itemText: item.itemText})
-                    // console.log(matchingId.itemText)
-                    // This is the case where the item with matching ID exists but itemText is different.
-                }
-            } else {
-                // Based on the current if-check, this should be the case when there is a new item object coming in.
-                // console.log("It ain't here chief")
-                batch.set(doc(itemCollectionRef), {itemText: item.itemText})
+        for (const [itemId, itemData] of currentItems.entries()) {
+            if (!updatedItems.has(itemId)) {
+                const itemDocRef = doc(itemCollectionRef, itemId)
+                batch.delete(itemDocRef)
             }
         }
+
+        for (const[itemId, itemData] of updatedItems.entries()) {
+            if (currentItems.has(itemId)) {
+                const existingItem = currentItems.get(itemId)
+                if (existingItem.itemText !== itemData.itemText) {
+                    const itemDocRef = doc(itemCollectionRef, itemId)
+                    batch.update(itemDocRef, {itemText: itemData.itemText})
+                }
+            } else {
+                const newItemDocRef = doc(itemCollectionRef, itemId)
+                batch.set(newItemDocRef, {itemText: itemData.itemText})
+            }
+        }
+
         await batch.commit()
-        // Okay, this does work because I can see the added item in Firestore Database. However, right now, editing an existing item
-        // doesn't work yet, because that is going to need a separate function before it makes it here. That other function will have
-        // to work with "Save" button, so we're thinking "onSaveEdit" in "TheList.jsx". 
-        // Now, something else we need to implement is actually updating (re-populating, or adding to) "listArray" so that the new/edited item
-        // is visible on screen. I'm talking about right there and then, as in after clicking "Finish" and confirming the update, when the user
-        // goes back to that particular list, it should display the new/edited item.
+
     } catch (error) {
         throw error
     }
 
 }
 
-const removeListItems = async (userId, listId, itemsArray) => {
+const removeListItems = async (userId, listId, itemIdsArray) => {
     // To delete certain items from a certain list that belongs to a certain user, we'll need the user's ID and that of the list. Because the
     // user can multi-select items to remove, we'll just pass in an array of item objects/IDs. Again, this function will be called when the user
     // presses "Confirm" button. I might add like 5-second cooldown before the deletion is actually carried out just in case the user wants
@@ -253,7 +234,7 @@ const removeListItems = async (userId, listId, itemsArray) => {
     // This is likely going to be called inside "deleteUserList". Not all the time, but that's definitely one of the cases.
     // Actually, I might implement "deleteUserList" case in that function, since its job is to delete everything about that list anyway.
     // Just to clarify, "itemsArray" here refers to the array of items to be deleted.
-    if (!userId) {
+    if (!userId || !listId || !Array.isArray(itemIdsArray)) {
         throw new Error("Invalid User ID")
     }
 
@@ -269,7 +250,7 @@ const removeListItems = async (userId, listId, itemsArray) => {
     const batch = writeBatch(db)
 
     try {
-        itemsArray.forEach(itemId => {
+        itemIdsArray.forEach(itemId => {
             const itemDocRef = doc(itemCollectionRef, itemId)
             batch.delete(itemDocRef)
         })

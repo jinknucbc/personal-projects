@@ -10,7 +10,7 @@ function MainScreen() {
   // This is where list cards will be displayed.
 
   // const {listArray, setListArray, fetchLists, refreshCounter, removeList, removeAllLists} = useContext(ContextContainer)
-  const {listArray, setListArray, fetchLists, refreshCounter, removeList, removeAllLists} = useListContext()
+  const {listArray, setListArray, refreshLists, refreshCounter, removeList, removeAllLists} = useListContext()
 
   // This is likely to be an array of objects containing the ID of the array and the contents.
 
@@ -35,7 +35,7 @@ function MainScreen() {
       const userId = auth.currentUser?.uid
       if (userId) {
         try {
-          await fetchLists(auth.currentUser.uid)
+          await refreshLists()
         } catch (error) {
           throw error
         } finally {
@@ -51,7 +51,7 @@ function MainScreen() {
     } else {
       setLoading(false)
     }
-  }, [fetchLists, user, refreshCounter])
+  }, [refreshLists, user, refreshCounter])
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -135,8 +135,17 @@ function MainScreen() {
     removeList(auth.currentUser.uid, removeSelected)
   }
 
-  const handleDeleteAllLists = () => {
-    removeAllLists(user.uid)
+  const handleDeleteAllLists = async () => {
+    try {
+        const confirmClear = window.confirm("Are you sure you want to delete ALL your lists? This cannot be undone.")
+        if (confirmClear) {
+            await removeAllLists(user.uid) // Await the operation
+            // setListArray([]) is handled by removeAllLists in ListContext now
+        }
+    } catch (error) {
+        console.error("Error deleting all lists:", error);
+        alert("Failed to delete all lists. Please try again.");
+    }
   }
 
   const handleLogout = async () => {

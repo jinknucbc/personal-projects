@@ -17,10 +17,11 @@ function TheList({isNew}) {
     const [inRemoveMode, setInRemoveMode] = useState(false)
     const [removeSelected, setRemoveSelected] = useState([])
     const [showRemovalModal, setShowRemovalModal] = useState(false)
+    const [contentFromDatabase, setContentFromDatabase] = useState([])
     const listContainer = useRef(null)
     const [currentList, setCurrentList] = useState(null)
     const {id} = useParams()
-    const {onCreateList, listArray, setListArray, updateList, fetchLists, removeItems, removeAllListItems} = useContext(ContextContainer)
+    const {onCreateList, listArray, setListArray, updateList, removeItems, removeAllListItems} = useContext(ContextContainer)
     const {user} = useAuth()
     const nav = useNavigate();
 
@@ -48,10 +49,12 @@ function TheList({isNew}) {
                 title: "New List",
                 content: []
             })
+            setContentFromDatabase([])
         } else {
             const fetchList = listArray.find((lists) => lists.id === id)
             if (fetchList) {
                 setCurrentList(fetchList)
+                setContentFromDatabase(fetchList.content)
             } else {
                 nav("/main-screen")
             }
@@ -103,15 +106,29 @@ function TheList({isNew}) {
     }
 
     try {
-        setCurrentList((prevList) => ({...prevList, content: prevList.content.filter((item) => !removeSelected.includes(item.itemId))}))
 
-        await removeItems(user.uid, id, removeSelected)
+        const itemIdsFromDbDelete = []
+
+        if (!isNew & contentFromDatabase) {
+            const itemsFromDbIds = new Set(contentFromDatabase.map(item => item.itemId))
+            removeSelected.forEach(selectedId => {
+                if (itemsFromDbIds.has(selectedId)) {
+                    itemIdsFromDbDelete.push(selectedId)
+                }
+            })
+        }
+
+        const updatedLocal = currentList.content.filter((item) => !removeSelected.includes(item.itemId))
+
+        setCurrentList((prevList) => ({...prevList, content: updatedLocal}))
+
+        if (itemIdsFromDbDelete.length > 0) {
+            await removeItems(user.uid, id, itemIdsFromDbDelete)
+        }
 
         setListArray((oldLists) => 
             oldLists.map((list) => 
-                list.id === id ? {...list, content: list.content.filter((item) => !removeSelected.includes(item.itemId))} : list
-                    
-                
+                list.id === id ? {...currentList, content: updatedLocal} : list
             )
         )
     } catch (error) {
@@ -173,7 +190,7 @@ function TheList({isNew}) {
                 return list
             })
         )
-        await updateList(id, {...currentList, content: updatedList})
+        await updateList(user.uid, id, {...currentList, content: updatedList})
     } catch (error) {
         throw error
     } finally {
@@ -191,13 +208,22 @@ function TheList({isNew}) {
     setRemoveSelected([])
    }
 
-   const handleFinish = () => {
-    if (isNew) {
-        onCreateList(currentList)
-    } else {
-        updateList(id, currentList)
-        nav("/main-screen")
+   const handleFinish = async () => {
+    if (!user || !user.uid) {
+        alert("Authentication required!")
+        return
     }
+    try {
+            if (isNew) {
+                await onCreateList(currentList)
+            } else {
+                await updateList(user.uid, id, currentList) 
+            }
+            nav("/main-screen")
+        } catch (error) {
+            console.error("Error saving list:", error)
+            alert("Failed to save list. Please try again.")
+        }
    }
 
    const handleChangeTitle = (e) => {
@@ -206,15 +232,27 @@ function TheList({isNew}) {
 
    const removeAllHandler = async () => {
 
-    if (currentList.length === 0) {
+    if (!user || !user.uid) {
+        setCanSelect(false)
+        setInEditMode(false)
+        setInRemoveMode(false)
+        setSelectItem(null)
+        setRemoveSelected([])
+        setShowRemovalModal(false)
+        alert("You must be logged in to perform this action.")
+        return
+    }
+
+    if (!currentList || currentList.length === 0) {
         alert("The list is already empty!")
         return
     }
     const confirmClear = window.confirm("Are you sure you want to delete everything?")
     if (confirmClear) {
         try {
-            await removeAllListItems(user.uid, id)
-            removeAllListItems(user.uid, id)
+            if (!isNew && contentFromDatabase) {
+                await removeAllListItems(user.uid, id)
+            }
             setCurrentList((prevList) => ({...prevList, content: []}))
             setListArray((prevList) => 
                 prevList.map((list) => {
